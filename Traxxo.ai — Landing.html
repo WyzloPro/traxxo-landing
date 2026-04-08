@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Traxxo — SEO & E-commerce Intelligence</title>
+  <meta name="description" content="Dashboard SEO y e-commerce automatizado. Conecta GSC, Ads, Semrush y tu tienda. Datos frescos cada lunes sin intervención." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #09090b;
+      --surface:  #111113;
+      --border:   #1f1f23;
+      --text:     #fafafa;
+      --muted:    #71717a;
+      --accent:   #22d3ee;    /* cyan */
+      --accent2:  #0e7490;
+      --subtle:   rgba(34,211,238,.08);
+      --font:     'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 60px;
+      background: rgba(9,9,11,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: 700; color: var(--text); text-decoration: none;
+    }
+    .nav-logo svg { flex-shrink: 0; }
+    .nav-cta {
+      padding: 8px 18px; border-radius: 8px;
+      background: var(--accent); color: #000;
+      font-size: 13px; font-weight: 600;
+      text-decoration: none; transition: opacity .15s;
+    }
+    .nav-cta:hover { opacity: .85; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(34,211,238,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px; border-radius: 20px;
+      border: 1px solid rgba(34,211,238,.3);
+      background: rgba(34,211,238,.06);
+      font-size: 12px; font-weight: 500; color: var(--accent);
+      margin-bottom: 32px; letter-spacing: .02em;
+    }
+    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 72px);
+      font-weight: 800; line-height: 1.08;
+      letter-spacing: -.03em;
+      max-width: 860px;
+      margin-bottom: 24px;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted); max-width: 560px;
+      line-height: 1.6; margin-bottom: 48px;
+    }
+
+    /* ── WAITLIST FORM ── */
+    .waitlist-form {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 20px;
+    }
+    .waitlist-form input {
+      width: 280px; padding: 13px 18px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 14px;
+      font-family: var(--font); outline: none; transition: border-color .15s;
+    }
+    .waitlist-form input::placeholder { color: var(--muted); }
+    .waitlist-form input:focus { border-color: rgba(34,211,238,.4); }
+    .waitlist-form button {
+      padding: 13px 24px; border-radius: 10px;
+      background: var(--accent); border: none;
+      color: #000; font-size: 14px; font-weight: 600;
+      font-family: var(--font); cursor: pointer; transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .waitlist-form button:hover { opacity: .85; }
+    .waitlist-note { font-size: 12px; color: var(--muted); }
+
+    /* ── STATS ── */
+    .stats {
+      display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+      padding: 64px 24px; border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-item { text-align: center; }
+    .stat-val { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-val em { font-style: normal; color: var(--accent); }
+    .stat-lbl { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+    /* ── SECTION ── */
+    section { padding: 96px 24px; max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+    }
+    h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800; letter-spacing: -.025em; line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 17px; color: var(--muted); max-width: 520px; line-height: 1.6;
+      margin-bottom: 56px;
+    }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px; background: var(--border); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .feature-card {
+      background: var(--surface); padding: 32px;
+      transition: background .15s;
+    }
+    .feature-card:hover { background: #18181b; }
+    .feature-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--subtle); border: 1px solid rgba(34,211,238,.15);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px; font-size: 18px;
+    }
+    .feature-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── HOW IT WORKS ── */
+    .steps { display: flex; flex-direction: column; gap: 0; position: relative; }
+    .steps::before {
+      content: ''; position: absolute; left: 19px; top: 24px; bottom: 24px;
+      width: 1px; background: var(--border);
+    }
+    .step { display: flex; gap: 24px; padding: 32px 0; }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--accent);
+      position: relative; z-index: 1;
+    }
+    .step-content { padding-top: 8px; }
+    .step-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .step-desc { font-size: 15px; color: var(--muted); line-height: 1.6; max-width: 480px; }
+
+    /* ── SOURCES ── */
+    .sources {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px;
+    }
+    .source-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface);
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      transition: border-color .15s, color .15s;
+    }
+    .source-pill:hover { border-color: rgba(34,211,238,.3); color: var(--text); }
+    .source-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ── TESTIMONIAL / CASE ── */
+    .case-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 48px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+      align-items: center;
+    }
+    .case-metrics { display: flex; flex-direction: column; gap: 20px; }
+    .case-metric {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; border-radius: 10px;
+      background: var(--bg); border: 1px solid var(--border);
+    }
+    .case-metric-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+    .case-metric-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .case-text h3 { font-size: 24px; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
+    .case-text p { font-size: 15px; color: var(--muted); line-height: 1.7; }
+    .case-industry {
+      display: inline-block; margin-top: 20px;
+      padding: 4px 12px; border-radius: 6px;
+      background: var(--subtle); border: 1px solid rgba(34,211,238,.2);
+      font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    /* ── FINAL CTA ── */
+    .cta-section {
+      text-align: center; padding: 120px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .cta-section h2 { margin-bottom: 16px; }
+    .cta-section p { color: var(--muted); font-size: 17px; max-width: 440px; margin: 0 auto 40px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .footer-logo { font-size: 15px; font-weight: 700; color: var(--muted); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .15s; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── SUCCESS STATE ── */
+    .waitlist-success {
+      display: none; padding: 14px 24px; border-radius: 10px;
+      background: rgba(34,211,238,.08); border: 1px solid rgba(34,211,238,.2);
+      color: var(--accent); font-size: 14px; font-weight: 500;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .case-block { grid-template-columns: 1fr; }
+      .stats { gap: 32px; }
+      section { padding: 64px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <rect width="22" height="22" rx="6" fill="#22d3ee" fill-opacity=".12"/>
+      <path d="M5 11h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    traxxo
+  </a>
+  <a href="#waitlist" class="nav-cta">Acceso anticipado</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge">
+    <span></span>
+    En desarrollo · Acceso anticipado disponible
+  </div>
+
+  <h1>Tu SEO y tus ventas,<br/><em>en un solo dashboard</em></h1>
+
+  <p class="hero-sub">
+    Conecta Google Search Console, Google Ads, Semrush y tu tienda.
+    Datos frescos cada lunes. Acciones priorizadas listas para ejecutar.
+  </p>
+
+  <div class="waitlist-form" id="waitlist">
+    <input type="email" id="email-input" placeholder="tu@empresa.com" />
+    <button onclick="joinWaitlist()">Solicitar acceso</button>
+  </div>
+  <div class="waitlist-success" id="waitlist-success">
+    ✓ Apuntado. Te avisamos cuando abramos acceso.
+  </div>
+  <p class="waitlist-note">Sin tarjeta de crédito · Sin compromiso</p>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item">
+    <div class="stat-val">191<em>k</em></div>
+    <div class="stat-lbl">clics orgánicos gestionados</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val">14→<em>7</em></div>
+    <div class="stat-lbl">posición media en 8 meses</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val"><em>4h</em>/sem</div>
+    <div class="stat-lbl">ahorradas en análisis manual</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val"><em>5</em> APIs</div>
+    <div class="stat-lbl">conectadas automáticamente</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <p class="section-label">Funcionalidades</p>
+  <h2>Todo lo que necesitas,<br/>sin montar nada</h2>
+  <p class="section-sub">Traxxo conecta tus herramientas y genera el análisis automáticamente. Tú solo ejecutas.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Clusters SEO por tema</div>
+      <div class="feature-desc">Agrupa tus keywords por temática. Ve qué clusters suben, cuáles bajan y cuáles atacar primero esta semana.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Plan de acción semanal</div>
+      <div class="feature-desc">Cada lunes: 8 acciones SEO priorizadas por impacto real en clics. Sin interpretación, listas para ejecutar.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛒</div>
+      <div class="feature-title">Datos de tu tienda</div>
+      <div class="feature-desc">Revenue, pedidos, top productos y métodos de pago directo desde PrestaShop, Shopify o WooCommerce.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Google Ads + ROAS real</div>
+      <div class="feature-desc">Campañas, gasto y conversiones correctamente configuradas. Detecta campañas pausadas con productos de alta venta.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">Gap vs competidores</div>
+      <div class="feature-desc">Keywords donde tu competidor aparece y tú no. Con volumen, dificultad y CPC estimado.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔄</div>
+      <div class="feature-title">100% automático</div>
+      <div class="feature-desc">Cron semanal y mensual. El lunes abres el dashboard y los datos ya están frescos. Sin tocar nada.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="border-top: 1px solid var(--border);">
+  <p class="section-label">Cómo funciona</p>
+  <h2>En marcha en una tarde</h2>
+  <p class="section-sub">Sin instalaciones, sin código. Solo conectas tus cuentas y Traxxo hace el resto.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Conectas tus herramientas</div>
+        <div class="step-desc">OAuth seguro con Google (GSC, GA4, Ads), tu key de Semrush y acceso a tu tienda. Una sola vez.</div>
+        <div class="sources">
+          <div class="source-pill"><div class="source-dot" style="background:#4285f4"></div>Google Search Console</div>
+          <div class="source-pill"><div class="source-dot" style="background:#34a853"></div>Google Ads</div>
+          <div class="source-pill"><div class="source-dot" style="background:#ff6b35"></div>Semrush</div>
+          <div class="source-pill"><div class="source-dot" style="background:#e74c3c"></div>PrestaShop</div>
+          <div class="source-pill"><div class="source-dot" style="background:#7952b3"></div>Shopify</div>
+          <div class="source-pill"><div class="source-dot" style="background:#21759b"></div>WooCommerce</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Configuramos tu dashboard</div>
+        <div class="step-desc">Definimos tus clusters temáticos, competidores y objetivos. Lo hacemos contigo en el onboarding. Una sola vez.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Datos frescos cada semana</div>
+        <div class="step-desc">Cada lunes tienes el dashboard actualizado con comparativas, diagnósticos y las 8 acciones de la semana ordenadas por impacto.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDY -->
+<section style="border-top: 1px solid var(--border);">
+  <p class="section-label">Caso real</p>
+  <div class="case-block">
+    <div class="case-metrics">
+      <div class="case-metric">
+        <div>
+          <div class="case-metric-val">14.3 → 7.3</div>
+          <div class="case-metric-lbl">Posición media en Google (8 meses)</div>
+        </div>
+      </div>
+      <div class="case-metric">
+        <div>
+          <div class="case-metric-val">191.381</div>
+          <div class="case-metric-lbl">Clics orgánicos gestionados</div>
+        </div>
+      </div>
+      <div class="case-metric">
+        <div>
+          <div class="case-metric-val">~4h/semana</div>
+          <div class="case-metric-lbl">Ahorradas en análisis manual</div>
+        </div>
+      </div>
+      <div class="case-metric">
+        <div>
+          <div class="case-metric-val">8 clusters</div>
+          <div class="case-metric-lbl">SEO monitorizados automáticamente</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-text">
+      <h3>De 14 a 7 de posición media en 8 meses</h3>
+      <p>Un e-commerce de material sanitario en España usó Traxxo para conectar GSC, Google Ads y PrestaShop. El resultado: posición media pasó de 14.3 a 7.3, con acciones semanales priorizadas por impacto real en ventas.</p>
+      <p style="margin-top:12px">Sin hojas de cálculo. Sin exportaciones manuales. El lunes llegan los datos y las acciones ya están ordenadas.</p>
+      <span class="case-industry">E-commerce · Material sanitario · España</span>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="cta-section">
+  <p class="section-label">Acceso anticipado</p>
+  <h2>Sé de los primeros</h2>
+  <p>Estamos abriendo acceso a los primeros clientes. Sin tarjeta, sin compromiso.</p>
+
+  <div class="waitlist-form">
+    <input type="email" id="email-input-2" placeholder="tu@empresa.com" />
+    <button onclick="joinWaitlist2()">Solicitar acceso</button>
+  </div>
+  <div class="waitlist-success" id="waitlist-success-2"></div>
+  <p class="waitlist-note" style="margin-top:12px">Te contactamos personalmente para el onboarding</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">traxxo.ai</div>
+  <div class="footer-links">
+    <a href="mailto:hola@traxxo.ai">hola@traxxo.ai</a>
+    <a href="#waitlist">Acceso anticipado</a>
+  </div>
+</footer>
+
+<script>
+  function joinWaitlist() {
+    var email = document.getElementById('email-input').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('email-input').focus();
+      return;
+    }
+    document.querySelector('.waitlist-form').style.display = 'none';
+    var success = document.getElementById('waitlist-success');
+    success.style.display = 'block';
+    success.textContent = '✓ Apuntado. Te avisamos cuando abramos acceso.';
+    // En producción aquí iría el fetch a Supabase o similar
+  }
+
+  function joinWaitlist2() {
+    var email = document.getElementById('email-input-2').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('email-input-2').focus();
+      return;
+    }
+    document.querySelectorAll('.waitlist-form')[1].style.display = 'none';
+    var success = document.getElementById('waitlist-success-2');
+    success.style.display = 'block';
+    success.textContent = '✓ Apuntado. Te avisamos cuando abramos acceso.';
+  }
+</script>
+
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>
