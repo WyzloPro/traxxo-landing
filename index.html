@@ -137,18 +137,71 @@
       background: #09090b; color: var(--text); font-size: 14px; font-family: var(--font);
       outline: none;
     }
-    .waitlist-form input:focus { border-color: rgba(34,211,238,.35); }
+    .waitlist-form input:focus, .waitlist-form textarea:focus { border-color: rgba(34,211,238,.35); }
+    .waitlist-form textarea {
+      width: 100%; min-height: 88px; padding: 12px 15px;
+      border-radius: 14px; border: 1px solid var(--border);
+      background: #09090b; color: var(--text); font-size: 14px; font-family: var(--font);
+      outline: none; resize: vertical; line-height: 1.5;
+    }
     .waitlist-form button {
       min-height: 48px; padding: 0 16px;
       border-radius: 14px; border: none;
       background: var(--accent); color: #031218;
       font-size: 14px; font-weight: 700; font-family: var(--font); cursor: pointer;
+      transition: opacity .15s ease;
+    }
+    .waitlist-form button:disabled { opacity: .5; cursor: not-allowed; }
+    .field-label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--muted);
+      margin-bottom: 6px; letter-spacing: .01em;
+    }
+    .field-label .req { color: var(--accent); }
+    .field-group { display: flex; flex-direction: column; }
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center;
+      padding: 8px 13px; border-radius: 999px;
+      background: rgba(255,255,255,.02); border: 1px solid var(--border);
+      color: #c4c4cb; font-size: 13px; font-family: var(--font); font-weight: 500;
+      cursor: pointer; user-select: none; transition: border-color .15s, background .15s, color .15s;
+    }
+    .chip:hover { border-color: rgba(34,211,238,.25); }
+    .chip.active {
+      background: var(--accent-soft); border-color: rgba(34,211,238,.4);
+      color: var(--accent); font-weight: 600;
+    }
+    .consent-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: #c4c4cb; line-height: 1.45; cursor: pointer;
+    }
+    .consent-row input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none;
+      width: 18px; height: 18px; min-width: 18px; margin-top: 1px;
+      border-radius: 5px; border: 1px solid var(--border);
+      background: #09090b; cursor: pointer; position: relative;
+    }
+    .consent-row input[type="checkbox"]:checked {
+      background: var(--accent); border-color: var(--accent);
+    }
+    .consent-row input[type="checkbox"]:checked::after {
+      content: ""; position: absolute; left: 5px; top: 2px;
+      width: 5px; height: 9px; border: solid #031218;
+      border-width: 0 2px 2px 0; transform: rotate(45deg);
+    }
+    .consent-row a { color: var(--accent); text-decoration: none; }
+    .honey { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
+    .form-error {
+      display: none; margin-top: 10px; padding: 10px 14px;
+      border-radius: 12px; border: 1px solid rgba(239,68,68,.25);
+      background: rgba(239,68,68,.08); color: #fca5a5; font-size: 13px;
     }
     .waitlist-note { color: var(--muted); font-size: 12px; }
     .waitlist-success {
-      display: none; margin-top: 12px; padding: 12px 14px;
+      display: none; margin-top: 12px; padding: 14px 16px;
       border-radius: 14px; border: 1px solid rgba(52,211,153,.2);
       background: rgba(52,211,153,.08); color: var(--ok); font-size: 13px; font-weight: 600;
+      line-height: 1.5;
     }
     .stage-grid, .who-grid, .fit-grid {
       display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
@@ -274,19 +327,69 @@
 
       <aside class="hero-panel" id="waitlist">
         <div class="panel-kicker">
-          <strong>Lista de espera Traxxo</strong>
+          <strong>Solicita acceso a la beta</strong>
           <span class="panel-pill">Early access</span>
         </div>
         <p class="panel-copy">
-          Déjanos tu email y te avisaremos cuando abramos nuevas plazas.
-          No verás pricing cerrado todavía porque Traxxo aún no está en fase comercial completa.
+          Cuéntanos lo justo para evaluar el encaje. Si hay match, hacemos auditoría inicial y abrimos conversación.
         </p>
-        <div class="waitlist-form" id="waitlist-form-main">
-          <input type="email" id="email-input" placeholder="tu@empresa.com" />
-          <button onclick="joinWaitlist()">Quiero entrar en la beta</button>
-        </div>
+        <form class="waitlist-form" id="waitlist-form-main" onsubmit="return submitLead(event)" novalidate>
+          <div class="field-group">
+            <label class="field-label" for="f-name">Nombre <span class="req">*</span></label>
+            <input type="text" id="f-name" name="name" autocomplete="name" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-email">Email <span class="req">*</span></label>
+            <input type="email" id="f-email" name="email" autocomplete="email" placeholder="tu@empresa.com" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-domain">URL de tu web <span class="req">*</span></label>
+            <input type="url" id="f-domain" name="domain" autocomplete="url" placeholder="https://miweb.com" required />
+          </div>
+          <div class="field-group">
+            <span class="field-label">¿Cuál es tu objetivo? <span class="req">*</span></span>
+            <div class="chip-group" data-chip-group="objective" data-required="true">
+              <span class="chip" data-value="mas-trafico">Más tráfico</span>
+              <span class="chip" data-value="mas-conversion">Más conversión</span>
+              <span class="chip" data-value="migracion">Migración</span>
+              <span class="chip" data-value="recuperar-caida">Recuperar caída</span>
+              <span class="chip" data-value="lanzar">Lanzar de cero</span>
+              <span class="chip" data-value="internacionalizacion">Internacionalización</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-context">Cuéntanos brevemente tu situación</label>
+            <textarea id="f-context" name="context" maxlength="600" placeholder="Lo que más te importa ahora mismo en tu proyecto."></textarea>
+          </div>
+          <div class="field-group">
+            <span class="field-label">Presupuesto mensual aproximado <span class="req">*</span></span>
+            <div class="chip-group" data-chip-group="budget" data-required="true">
+              <span class="chip" data-value="<300">&lt; 300€</span>
+              <span class="chip" data-value="300-800">300–800€</span>
+              <span class="chip" data-value="800-2k">800–2k€</span>
+              <span class="chip" data-value="2k-5k">2k–5k€</span>
+              <span class="chip" data-value=">5k">&gt; 5k€</span>
+              <span class="chip" data-value="sin-definir">Sin definir</span>
+            </div>
+          </div>
+          <div class="field-group">
+            <span class="field-label">¿Cuándo quieres empezar? <span class="req">*</span></span>
+            <div class="chip-group" data-chip-group="urgency" data-required="true">
+              <span class="chip" data-value="ya">Ya</span>
+              <span class="chip" data-value="1-3-meses">1–3 meses</span>
+              <span class="chip" data-value="explorando">Explorando</span>
+            </div>
+          </div>
+          <label class="consent-row">
+            <input type="checkbox" id="f-privacy" name="privacy" required />
+            <span>He leído y acepto la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>. <span class="req">*</span></span>
+          </label>
+          <input type="text" class="honey" id="f-website2" name="website2" tabindex="-1" autocomplete="off" />
+          <button type="submit" id="f-submit">Solicitar acceso</button>
+          <div class="form-error" id="form-error"></div>
+        </form>
         <div class="waitlist-success" id="waitlist-success"></div>
-        <p class="waitlist-note">Sin tarjeta. Sin spam. Solo acceso, novedades y apertura de plazas.</p>
+        <p class="waitlist-note">Sin tarjeta. Sin spam. Solo respuesta cuando haya encaje.</p>
       </aside>
     </section>
 
@@ -376,12 +479,8 @@
           </p>
         </div>
         <div>
-          <div class="waitlist-form" id="waitlist-form-bottom">
-            <input type="email" id="email-input-2" placeholder="tu@empresa.com" />
-            <button onclick="joinWaitlist2()">Entrar en la lista</button>
-          </div>
-          <div class="waitlist-success" id="waitlist-success-2"></div>
-          <p class="waitlist-note">También puedes escribirnos a hola@traxxo.ai si quieres contarnos tu caso.</p>
+          <a href="#waitlist" class="nav-cta" style="min-height:48px;padding:0 22px;font-size:14px;">Solicitar acceso</a>
+          <p class="waitlist-note" style="margin-top:14px;">También puedes escribirnos a <a href="mailto:hola@traxxo.ai" style="color:var(--accent);text-decoration:none;">hola@traxxo.ai</a> si quieres contarnos tu caso.</p>
         </div>
       </div>
     </div>
@@ -403,29 +502,87 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4'
     );
 
-    async function saveEmail(email, formId, successId) {
-      if (!email || !email.includes('@')) return false;
-      var formEl = document.getElementById(formId);
-      var el = document.getElementById(successId);
-      var result = await sb.from('waitlist').insert({ email: email });
-      if (formEl) formEl.style.display = 'none';
-      if (el) {
-        el.style.display = 'block';
-        el.textContent = result.error && result.error.code === '23505'
-          ? '✓ Ya estabas en la lista. Te avisaremos cuando abramos nuevas plazas.'
-          : '✓ Ya estás dentro. Te avisaremos cuando abramos nuevas plazas.';
+    // Chip groups (single-select)
+    document.querySelectorAll('.chip-group').forEach(function(group){
+      group.addEventListener('click', function(e){
+        var chip = e.target.closest('.chip');
+        if (!chip) return;
+        group.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+        chip.classList.add('active');
+      });
+    });
+
+    function getChipValue(name) {
+      var group = document.querySelector('.chip-group[data-chip-group="' + name + '"]');
+      var active = group ? group.querySelector('.chip.active') : null;
+      return active ? active.getAttribute('data-value') : null;
+    }
+
+    function showError(msg) {
+      var el = document.getElementById('form-error');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function clearError() {
+      var el = document.getElementById('form-error');
+      el.style.display = 'none';
+      el.textContent = '';
+    }
+
+    async function submitLead(e) {
+      e.preventDefault();
+      clearError();
+
+      // Honeypot
+      if (document.getElementById('f-website2').value) return false;
+
+      var name = document.getElementById('f-name').value.trim();
+      var email = document.getElementById('f-email').value.trim();
+      var domain = document.getElementById('f-domain').value.trim();
+      var context = document.getElementById('f-context').value.trim();
+      var privacy = document.getElementById('f-privacy').checked;
+      var objective = getChipValue('objective');
+      var budget = getChipValue('budget');
+      var urgency = getChipValue('urgency');
+
+      if (!name) { showError('Falta tu nombre.'); return false; }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Email no válido.'); return false; }
+      if (!domain) { showError('Falta la URL de tu web.'); return false; }
+      if (!objective) { showError('Selecciona un objetivo.'); return false; }
+      if (!budget) { showError('Selecciona un presupuesto.'); return false; }
+      if (!urgency) { showError('Indica cuándo quieres empezar.'); return false; }
+      if (!privacy) { showError('Debes aceptar la política de privacidad.'); return false; }
+
+      var btn = document.getElementById('f-submit');
+      btn.disabled = true;
+      var originalText = btn.textContent;
+      btn.textContent = 'Enviando…';
+
+      var payload = {
+        client_name: name,
+        client_email: email,
+        domain: domain,
+        objective: objective,
+        context: context || null,
+        budget: budget,
+        urgency: urgency,
+        privacy_consent: true
+      };
+
+      var result = await sb.from('leads_notify').insert(payload);
+
+      if (result.error) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        showError('No se pudo enviar. Inténtalo de nuevo o escríbenos a hola@traxxo.ai');
+        return false;
       }
-      return true;
-    }
 
-    async function joinWaitlist() {
-      var email = document.getElementById('email-input').value.trim();
-      await saveEmail(email, 'waitlist-form-main', 'waitlist-success');
-    }
-
-    async function joinWaitlist2() {
-      var email = document.getElementById('email-input-2').value.trim();
-      await saveEmail(email, 'waitlist-form-bottom', 'waitlist-success-2');
+      document.getElementById('waitlist-form-main').style.display = 'none';
+      var ok = document.getElementById('waitlist-success');
+      ok.style.display = 'block';
+      ok.innerHTML = '✓ Solicitud recibida.<br>Revisaremos tu proyecto y te escribimos en menos de 48h.';
+      return false;
     }
   </script>
 </body>
