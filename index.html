@@ -252,8 +252,8 @@
   <main class="stage">
     <div class="glyph">private<span class="sep">·</span>beta<span class="sep">·</span>by invitation</div>
 
-    <h1 class="wordmark" id="wordmark" data-text="tra×xo">
-      tra<span class="x">×</span>xo
+    <h1 class="wordmark" id="wordmark" data-text="traxxo">
+      tra<span class="x">x</span>xo
     </h1>
 
     <div class="tagline">acceso anticipado<span class="cur"></span></div>
@@ -406,17 +406,19 @@
           var ch = c.trail[k];
 
           if (k===0){
-            var aHead = Math.min(1, 0.92 * headBrightness);
+            // -30% brightness on the head
+            var aHead = Math.min(1, 0.64 * headBrightness);
             ctx.fillStyle = 'rgba(220,255,255,'+aHead+')';
-            ctx.shadowColor = 'rgba(34,211,238,'+(0.55*headBrightness)+')';
-            ctx.shadowBlur = 10*headBrightness;
+            ctx.shadowColor = 'rgba(34,211,238,'+(0.38*headBrightness)+')';
+            ctx.shadowBlur = 7*headBrightness;
             ctx.fillText(ch, cx, yy);
             ctx.shadowBlur = 0;
           } else {
-            var aTail = tail*tail*0.78;
+            // -30% brightness on the trail
+            var aTail = tail*tail*0.55;
             if (active && dh2 < FORCE_RADIUS_SQ){
               var pull2 = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
-              aTail = Math.min(1, aTail + pull2*0.28);
+              aTail = Math.min(1, aTail + pull2*0.20);
             }
             ctx.fillStyle = 'rgba(34,211,238,'+aTail+')';
             ctx.fillText(ch, cx, yy);
