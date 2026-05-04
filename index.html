@@ -1,589 +1,551 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="apple-touch-icon" href="/favicon.svg" />
-  <script>if(!localStorage.getItem('traxxo_lang_landing') && navigator.language && navigator.language.startsWith('en')){localStorage.setItem('traxxo_lang_landing','en');window.location.replace('/en.html');}</script>
-  <title>Traxxo — Private beta para equipos que quieren ordenar su SEO</title>
-  <meta name="description" content="Traxxo está en private beta. Conecta fuentes, organiza la base del proyecto y deja lista la inteligencia que luego se convierte en decisiones. Únete a la lista de espera." />
-  <meta property="og:title" content="Traxxo — Private beta" />
-  <meta property="og:description" content="Estamos construyendo Traxxo con los primeros proyectos. Únete a la waitlist para acceder cuando abramos nuevas plazas." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://traxxo.ai" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Traxxo — Private beta" />
-  <meta name="twitter:description" content="La capa operativa y de inteligencia para proyectos SEO en fase temprana. Únete a la waitlist." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Traxxo · acceso anticipado</title>
+  <meta name="description" content="Traxxo · acceso anticipado a la plataforma de SEO con IA." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #09090b;
-      --surface: #111113;
-      --surface-2: #0d1720;
-      --border: #1f1f23;
-      --text: #fafafa;
-      --muted: #8b8b93;
-      --accent: #22d3ee;
-      --accent-soft: rgba(34, 211, 238, .08);
-      --ok: #34d399;
-      --warn: #f59e0b;
-      --font: 'Inter', system-ui, sans-serif;
+    :root{
+      --bg:#09090b;
+      --bg-2:#07080a;
+      --fg:#fafafa;
+      --muted:#71717a;
+      --dim:#a1a1aa;
+      --accent:#22d3ee;
+      --accent-soft:rgba(34,211,238,.08);
+      --accent-line:rgba(34,211,238,.22);
+      --border:#1f1f23;
+      --ok:#34d399;
+      --err:#fca5a5;
+      --font:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+      --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
     }
-    html { scroll-behavior: smooth; }
-    body {
-      background:
-        radial-gradient(circle at top center, rgba(34, 211, 238, .10), transparent 34%),
-        linear-gradient(180deg, #07080a 0%, #09090b 100%);
-      color: var(--text);
-      font-family: var(--font);
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.6;
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow:hidden}
+    a{color:inherit;text-decoration:none}
+    button{font-family:var(--font)}
+
+    /* ---------- Canvas (Matrix) ---------- */
+    #fx{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:radial-gradient(ellipse at 50% 40%, #0b0d12 0%, #07080a 65%, #050608 100%)}
+
+    /* Cursor halo (pure CSS following pointer via JS variables) */
+    .halo{
+      position:fixed;
+      pointer-events:none;
+      z-index:1;
+      width:520px;height:520px;
+      left:var(--mx,50vw);top:var(--my,50vh);
+      transform:translate(-50%,-50%);
+      background:radial-gradient(circle, rgba(34,211,238,.18) 0%, rgba(34,211,238,.06) 28%, rgba(34,211,238,0) 65%);
+      mix-blend-mode:screen;
+      filter:blur(8px);
+      transition:opacity .4s ease;
     }
-    nav {
-      position: fixed; inset: 0 0 auto 0; z-index: 20;
-      display: flex; align-items: center; justify-content: space-between;
-      height: 64px; padding: 0 24px;
-      background: rgba(9, 9, 11, .86);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,.04);
+
+    /* ---------- Top bar ---------- */
+    .top{
+      position:fixed;top:0;left:0;right:0;z-index:5;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 28px;
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(7,8,10,.85) 0%, rgba(7,8,10,.4) 70%, rgba(7,8,10,0) 100%);
     }
-    .nav-logo {
-      display: inline-flex; align-items: center; gap: 10px;
-      text-decoration: none; color: var(--text); font-weight: 700; font-size: 17px;
+    .top > *{pointer-events:auto}
+    .brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:600;letter-spacing:.5px}
+    .brand-dot{
+      width:8px;height:8px;border-radius:50%;background:var(--accent);
+      box-shadow:0 0 12px var(--accent),0 0 28px rgba(34,211,238,.4);
+      animation:pulse 2.4s ease-in-out infinite;
     }
-    .nav-actions { display: flex; align-items: center; gap: 10px; }
-    .nav-link, .nav-cta {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-height: 38px; padding: 0 14px; border-radius: 999px;
-      font-size: 13px; font-weight: 600; text-decoration: none;
-      border: 1px solid var(--border);
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+    .brand-name{font-size:14px;color:var(--fg)}
+    .top-link{
+      font-family:var(--mono);font-size:12px;color:var(--dim);
+      padding:8px 14px;border:1px solid var(--border);border-radius:999px;
+      transition:color .2s,border-color .2s,background .2s;
     }
-    .nav-link { color: var(--muted); }
-    .nav-cta {
-      background: var(--accent); border-color: transparent; color: #031218;
+    .top-link:hover{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
+
+    /* ---------- Center stage ---------- */
+    .stage{
+      position:relative;z-index:3;
+      min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:80px 24px 60px;
     }
-    .lang-link {
-      color: var(--muted); text-decoration: none; font-size: 12px;
-      border: 1px solid var(--border); border-radius: 999px; padding: 6px 9px;
+    .glyph{
+      font-family:var(--mono);
+      font-size:11px;letter-spacing:.4em;text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:18px;
+      opacity:0;animation:fadeIn .9s .1s forwards;
     }
-    .hero {
-      padding: 132px 24px 72px;
-      max-width: 1160px; margin: 0 auto;
-      display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px;
-      align-items: start;
+    .glyph .sep{color:var(--accent);opacity:.6;margin:0 .35em}
+
+    .wordmark{
+      font-family:var(--font);
+      font-weight:800;
+      font-size:clamp(64px,14vw,168px);
+      letter-spacing:-.05em;
+      line-height:.9;
+      color:var(--fg);
+      position:relative;
+      user-select:none;
+      opacity:0;animation:fadeIn 1s .25s forwards;
     }
-    .hero-copy { padding-top: 24px; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 7px 12px; border-radius: 999px;
-      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.18);
-      color: #fbbf24; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
-      margin-bottom: 24px;
+    .wordmark .x{
+      color:var(--accent);
+      text-shadow:0 0 24px rgba(34,211,238,.35),0 0 60px rgba(34,211,238,.18);
+      position:relative;display:inline-block;
     }
-    .eyebrow::before {
-      content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--warn);
-      box-shadow: 0 0 0 6px rgba(245,158,11,.10);
+    .wordmark::before,.wordmark::after{
+      content:attr(data-text);
+      position:absolute;inset:0;
+      pointer-events:none;
+      opacity:0;
     }
-    h1 {
-      font-size: clamp(38px, 6vw, 72px);
-      line-height: 1.02; letter-spacing: -.04em;
-      margin-bottom: 22px; max-width: 760px;
+    .wordmark.glitch::before{
+      animation:glitch1 .55s steps(2,end);
+      color:#ff3860;mix-blend-mode:screen;
+      text-shadow:none;
     }
-    h1 em { font-style: normal; color: var(--accent); }
-    .hero-sub {
-      color: #a1a1aa; font-size: clamp(16px, 2vw, 20px);
-      max-width: 640px; margin-bottom: 30px;
+    .wordmark.glitch::after{
+      animation:glitch2 .55s steps(2,end);
+      color:var(--accent);mix-blend-mode:screen;
+      text-shadow:none;
     }
-    .hero-points {
-      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;
-      max-width: 620px;
+    @keyframes glitch1{
+      0%{opacity:0;transform:translate(0,0)}
+      20%{opacity:.85;transform:translate(-3px,1px) skewX(-2deg)}
+      40%{opacity:.4;transform:translate(2px,-1px)}
+      60%{opacity:.7;transform:translate(-1px,2px) skewX(1deg)}
+      80%{opacity:.3;transform:translate(1px,0)}
+      100%{opacity:0;transform:translate(0,0)}
     }
-    .hero-point {
-      padding: 14px 16px; border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.06);
-      background: rgba(255,255,255,.02);
+    @keyframes glitch2{
+      0%{opacity:0;transform:translate(0,0)}
+      20%{opacity:.6;transform:translate(2px,-2px)}
+      50%{opacity:.9;transform:translate(-2px,1px) skewX(2deg)}
+      80%{opacity:.5;transform:translate(1px,1px)}
+      100%{opacity:0;transform:translate(0,0)}
     }
-    .hero-point strong { display: block; font-size: 14px; margin-bottom: 4px; }
-    .hero-point span { display: block; color: var(--muted); font-size: 13px; }
-    .hero-panel {
-      background: linear-gradient(180deg, rgba(18,24,33,.96), rgba(14,16,21,.96));
-      border: 1px solid rgba(34,211,238,.12);
-      box-shadow: 0 20px 80px rgba(0,0,0,.32);
-      border-radius: 24px; padding: 24px;
+
+    .tagline{
+      font-family:var(--mono);
+      font-size:13px;color:var(--dim);
+      margin-top:22px;
+      letter-spacing:.05em;
+      opacity:0;animation:fadeIn 1s .55s forwards;
     }
-    .panel-kicker {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 18px; gap: 12px;
+    .tagline .cur{display:inline-block;width:7px;height:14px;background:var(--accent);margin-left:4px;vertical-align:-2px;animation:blink 1s steps(2) infinite}
+    @keyframes blink{50%{opacity:0}}
+    @keyframes fadeIn{to{opacity:1}}
+
+    /* ---------- Form ---------- */
+    .form{
+      margin-top:48px;width:100%;max-width:480px;
+      display:flex;flex-direction:column;gap:14px;
+      opacity:0;animation:fadeIn 1s .85s forwards;
     }
-    .panel-kicker strong { font-size: 14px; }
-    .panel-pill {
-      padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
-      background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.18); color: var(--ok);
+    .row{
+      display:flex;gap:8px;
+      background:rgba(15,17,21,.65);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:6px;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      transition:border-color .25s,box-shadow .25s,background .25s;
     }
-    .panel-copy {
-      color: #b3b3bc; font-size: 14px; margin-bottom: 18px;
+    .row:focus-within{
+      border-color:var(--accent-line);
+      background:rgba(15,20,26,.85);
+      box-shadow:0 0 0 4px var(--accent-soft),0 12px 40px rgba(34,211,238,.08);
     }
-    .waitlist-form {
-      display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px;
+    .row input{
+      flex:1;min-width:0;
+      background:transparent;border:0;outline:0;
+      color:var(--fg);font-size:15px;font-family:var(--font);font-weight:500;
+      padding:14px 14px;letter-spacing:.01em;
     }
-    .waitlist-form input {
-      width: 100%; min-height: 48px; padding: 0 15px;
-      border-radius: 14px; border: 1px solid var(--border);
-      background: #09090b; color: var(--text); font-size: 14px; font-family: var(--font);
-      outline: none;
+    .row input::placeholder{color:var(--muted)}
+    .row button{
+      background:var(--accent);color:#021014;border:0;border-radius:10px;
+      padding:0 22px;font-size:14px;font-weight:700;letter-spacing:.02em;
+      cursor:pointer;transition:transform .15s ease,box-shadow .25s ease,filter .2s;
+      box-shadow:0 0 0 0 rgba(34,211,238,.5);
     }
-    .waitlist-form input:focus, .waitlist-form textarea:focus { border-color: rgba(34,211,238,.35); }
-    .waitlist-form textarea {
-      width: 100%; min-height: 88px; padding: 12px 15px;
-      border-radius: 14px; border: 1px solid var(--border);
-      background: #09090b; color: var(--text); font-size: 14px; font-family: var(--font);
-      outline: none; resize: vertical; line-height: 1.5;
+    .row button:hover{filter:brightness(1.08);box-shadow:0 0 30px rgba(34,211,238,.35)}
+    .row button:active{transform:translateY(1px)}
+    .row button:disabled{opacity:.6;cursor:wait}
+
+    .meta{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+      font-family:var(--mono);font-size:11px;color:var(--muted);
+      padding:2px 8px 0;
     }
-    .waitlist-form button {
-      min-height: 48px; padding: 0 16px;
-      border-radius: 14px; border: none;
-      background: var(--accent); color: #031218;
-      font-size: 14px; font-weight: 700; font-family: var(--font); cursor: pointer;
-      transition: opacity .15s ease;
+    .meta a{color:var(--dim);border-bottom:1px dotted rgba(255,255,255,.15);padding-bottom:1px;transition:color .2s}
+    .meta a:hover{color:var(--accent);border-color:var(--accent-line)}
+    .privacy{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+    .privacy input{accent-color:var(--accent);width:13px;height:13px}
+
+    .feedback{
+      min-height:18px;font-family:var(--mono);font-size:12px;text-align:center;letter-spacing:.02em;
+      transition:color .2s;
     }
-    .waitlist-form button:disabled { opacity: .5; cursor: not-allowed; }
-    .field-label {
-      display: block; font-size: 12px; font-weight: 600; color: var(--muted);
-      margin-bottom: 6px; letter-spacing: .01em;
+    .feedback.err{color:var(--err)}
+    .feedback.ok{color:var(--ok)}
+
+    /* ---------- Success state ---------- */
+    .success{
+      position:relative;text-align:center;
+      max-width:480px;
+      padding:40px 28px;
+      border:1px solid var(--accent-line);
+      background:linear-gradient(180deg, rgba(34,211,238,.06), rgba(34,211,238,0));
+      border-radius:18px;
+      backdrop-filter:blur(14px);
+      animation:popIn .55s cubic-bezier(.2,.9,.3,1.2);
     }
-    .field-label .req { color: var(--accent); }
-    .field-group { display: flex; flex-direction: column; }
-    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip {
-      display: inline-flex; align-items: center;
-      padding: 8px 13px; border-radius: 999px;
-      background: rgba(255,255,255,.02); border: 1px solid var(--border);
-      color: #c4c4cb; font-size: 13px; font-family: var(--font); font-weight: 500;
-      cursor: pointer; user-select: none; transition: border-color .15s, background .15s, color .15s;
+    @keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .success h2{font-size:22px;margin:0 0 10px;font-weight:700;letter-spacing:-.01em}
+    .success p{font-size:14px;color:var(--dim);margin:0;line-height:1.6}
+    .success .ok-mark{
+      width:54px;height:54px;border-radius:50%;
+      border:1px solid var(--accent-line);background:var(--accent-soft);
+      display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
     }
-    .chip:hover { border-color: rgba(34,211,238,.25); }
-    .chip.active {
-      background: var(--accent-soft); border-color: rgba(34,211,238,.4);
-      color: var(--accent); font-weight: 600;
+    .success .ok-mark svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+    /* ---------- Footer ---------- */
+    .foot{
+      position:fixed;left:0;right:0;bottom:0;z-index:4;
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 28px;
+      font-family:var(--mono);font-size:11px;color:var(--muted);
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(7,8,10,0) 0%, rgba(7,8,10,.85) 60%, rgba(7,8,10,1) 100%);
     }
-    .consent-row {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 13px; color: #c4c4cb; line-height: 1.45; cursor: pointer;
+    .foot a{pointer-events:auto;transition:color .2s}
+    .foot a:hover{color:var(--accent)}
+    .foot .right{display:flex;gap:18px}
+
+    /* ---------- Responsive ---------- */
+    @media (max-width:560px){
+      .top{padding:14px 18px}
+      .top-link{font-size:11px;padding:7px 11px}
+      .stage{padding:90px 20px 80px}
+      .form{margin-top:36px}
+      .foot{padding:10px 18px;font-size:10px;flex-direction:column;gap:6px}
+      .foot .right{gap:12px}
+      .row{flex-direction:column;padding:8px}
+      .row button{width:100%;padding:14px}
     }
-    .consent-row input[type="checkbox"] {
-      appearance: none; -webkit-appearance: none;
-      width: 18px; height: 18px; min-width: 18px; margin-top: 1px;
-      border-radius: 5px; border: 1px solid var(--border);
-      background: #09090b; cursor: pointer; position: relative;
-    }
-    .consent-row input[type="checkbox"]:checked {
-      background: var(--accent); border-color: var(--accent);
-    }
-    .consent-row input[type="checkbox"]:checked::after {
-      content: ""; position: absolute; left: 5px; top: 2px;
-      width: 5px; height: 9px; border: solid #031218;
-      border-width: 0 2px 2px 0; transform: rotate(45deg);
-    }
-    .consent-row a { color: var(--accent); text-decoration: none; }
-    .honey { position: absolute; left: -9999px; opacity: 0; pointer-events: none; }
-    .form-error {
-      display: none; margin-top: 10px; padding: 10px 14px;
-      border-radius: 12px; border: 1px solid rgba(239,68,68,.25);
-      background: rgba(239,68,68,.08); color: #fca5a5; font-size: 13px;
-    }
-    .waitlist-note { color: var(--muted); font-size: 12px; }
-    .waitlist-success {
-      display: none; margin-top: 12px; padding: 14px 16px;
-      border-radius: 14px; border: 1px solid rgba(52,211,153,.2);
-      background: rgba(52,211,153,.08); color: var(--ok); font-size: 13px; font-weight: 600;
-      line-height: 1.5;
-    }
-    .stage-grid, .who-grid, .fit-grid {
-      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
-    }
-    section {
-      max-width: 1160px; margin: 0 auto; padding: 0 24px 28px;
-    }
-    .section-box {
-      border: 1px solid rgba(255,255,255,.06);
-      background: rgba(255,255,255,.02);
-      border-radius: 24px; padding: 28px;
-    }
-    .section-kicker {
-      font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 12px;
-    }
-    h2 {
-      font-size: clamp(28px, 4vw, 44px);
-      letter-spacing: -.03em; line-height: 1.05; margin-bottom: 12px;
-    }
-    .section-sub {
-      color: var(--muted); font-size: 16px; max-width: 720px; margin-bottom: 24px;
-    }
-    .stage-card, .who-card, .fit-card {
-      border-radius: 18px; padding: 20px;
-      background: #0d0d10; border: 1px solid rgba(255,255,255,.05);
-    }
-    .stage-card .badge {
-      display: inline-flex; padding: 5px 10px; border-radius: 999px;
-      font-size: 11px; font-weight: 700; margin-bottom: 14px;
-    }
-    .badge-live {
-      background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.16); color: var(--ok);
-    }
-    .badge-next {
-      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.16); color: #fbbf24;
-    }
-    .badge-later {
-      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); color: #c4c4cb;
-    }
-    .stage-card h3, .who-card h3, .fit-card h3 { font-size: 18px; margin-bottom: 8px; }
-    .stage-card p, .who-card p, .fit-card p { color: var(--muted); font-size: 14px; }
-    .bullet-list {
-      display: grid; gap: 10px; margin-top: 18px;
-    }
-    .bullet-item {
-      display: flex; gap: 10px; align-items: flex-start;
-      color: #c8c8cf; font-size: 14px;
-    }
-    .bullet-item::before {
-      content: ""; width: 8px; height: 8px; border-radius: 50%; flex: 0 0 8px;
-      background: var(--accent); margin-top: 8px;
-    }
-    .footer-cta {
-      max-width: 1160px; margin: 0 auto; padding: 24px;
-    }
-    .footer-cta .section-box { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: center; }
-    footer {
-      max-width: 1160px; margin: 0 auto; padding: 28px 24px 48px;
-      display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-      color: var(--muted); font-size: 13px;
-    }
-    footer a { color: var(--muted); text-decoration: none; }
-    .muted-links { display: flex; gap: 18px; flex-wrap: wrap; }
-    @media (max-width: 980px) {
-      .hero, .footer-cta .section-box, .stage-grid, .who-grid, .fit-grid { grid-template-columns: 1fr; }
-      .hero-copy { padding-top: 0; }
-    }
-    @media (max-width: 720px) {
-      nav { padding: 0 16px; }
-      .nav-link { display: none; }
-      .hero { padding: 108px 16px 56px; }
-      section, .footer-cta, footer { padding-left: 16px; padding-right: 16px; }
-      .hero-points { grid-template-columns: 1fr; }
+
+    @media (prefers-reduced-motion:reduce){
+      .glyph,.wordmark,.tagline,.form{opacity:1!important;animation:none!important}
+      .brand-dot{animation:none}
     }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="/" class="nav-logo">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect width="22" height="22" rx="6" fill="#22d3ee" fill-opacity=".12"/>
-        <path d="M5 11h4l2-5 2 10 2-5h2" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      traxxo
-    </a>
-    <div class="nav-actions">
-      <a href="#waitlist" class="nav-link">Lista de espera</a>
-      <a href="/en.html" class="lang-link">EN</a>
-      <a href="https://app.traxxo.ai" class="nav-link">Acceder</a>
-      <a href="#waitlist" class="nav-cta">Unirme</a>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div class="halo" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">traxxo</span>
     </div>
-  </nav>
+    <a href="https://app.traxxo.ai" class="top-link">login →</a>
+  </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="eyebrow">Private beta · plazas limitadas</div>
-        <h1>Traxxo está construyéndose con los primeros proyectos,<br><em>no abierto todavía a venta pública.</em></h1>
-        <p class="hero-sub">
-          Estamos cerrando la capa operativa del producto: conexiones, recolección, lectura interna y cerebro.
-          Ahora mismo buscamos proyectos e-commerce y equipos SEO que quieran entrar en la lista de espera.
-        </p>
-        <div class="hero-points">
-          <div class="hero-point">
-            <strong>Qué es Traxxo</strong>
-            <span>La capa que ordena fuentes, contexto del proyecto y análisis para que luego el cerebro pueda decidir.</span>
-          </div>
-          <div class="hero-point">
-            <strong>En qué fase está</strong>
-            <span>Recolector y conexiones ya en marcha. Ahora estamos levantando análisis interno y siguientes capas.</span>
-          </div>
-          <div class="hero-point">
-            <strong>Para quién es ahora</strong>
-            <span>E-commerce y proyectos que quieran construir el setup con nosotros desde el principio.</span>
-          </div>
-          <div class="hero-point">
-            <strong>Qué pasa si te apuntas</strong>
-            <span>Entrarás en la lista priorizada para las próximas plazas de beta y onboarding guiado.</span>
-          </div>
-        </div>
-      </div>
+  <main class="stage">
+    <div class="glyph">private<span class="sep">·</span>beta<span class="sep">·</span>by invitation</div>
 
-      <aside class="hero-panel" id="waitlist">
-        <div class="panel-kicker">
-          <strong>Solicita acceso a la beta</strong>
-          <span class="panel-pill">Early access</span>
+    <h1 class="wordmark" id="wordmark" data-text="tra×xo">
+      tra<span class="x">×</span>xo
+    </h1>
+
+    <div class="tagline">acceso anticipado<span class="cur"></span></div>
+
+    <div id="form-wrap">
+      <form class="form" id="lead-form" autocomplete="on" novalidate>
+        <div class="row">
+          <input type="email" id="f-email" name="email" placeholder="tu email" required autocomplete="email" inputmode="email" spellcheck="false" />
+          <button type="submit" id="f-submit">apuntarme</button>
         </div>
-        <p class="panel-copy">
-          Cuéntanos lo justo para evaluar el encaje. Si hay match, hacemos auditoría inicial y abrimos conversación.
-        </p>
-        <form class="waitlist-form" id="waitlist-form-main" onsubmit="return submitLead(event)" novalidate>
-          <div class="field-group">
-            <label class="field-label" for="f-name">Nombre <span class="req">*</span></label>
-            <input type="text" id="f-name" name="name" autocomplete="name" required />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="f-email">Email <span class="req">*</span></label>
-            <input type="email" id="f-email" name="email" autocomplete="email" placeholder="tu@empresa.com" required />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="f-domain">URL de tu web <span class="req">*</span></label>
-            <input type="url" id="f-domain" name="domain" autocomplete="url" placeholder="https://miweb.com" required />
-          </div>
-          <div class="field-group">
-            <span class="field-label">¿Cuál es tu objetivo? <span class="req">*</span></span>
-            <div class="chip-group" data-chip-group="objective" data-required="true">
-              <span class="chip" data-value="mas-trafico">Más tráfico</span>
-              <span class="chip" data-value="mas-conversion">Más conversión</span>
-              <span class="chip" data-value="migracion">Migración</span>
-              <span class="chip" data-value="recuperar-caida">Recuperar caída</span>
-              <span class="chip" data-value="lanzar">Lanzar de cero</span>
-              <span class="chip" data-value="internacionalizacion">Internacionalización</span>
-            </div>
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="f-context">Cuéntanos brevemente tu situación</label>
-            <textarea id="f-context" name="context" maxlength="600" placeholder="Lo que más te importa ahora mismo en tu proyecto."></textarea>
-          </div>
-          <div class="field-group">
-            <span class="field-label">Presupuesto mensual aproximado <span class="req">*</span></span>
-            <div class="chip-group" data-chip-group="budget" data-required="true">
-              <span class="chip" data-value="<300">&lt; 300€</span>
-              <span class="chip" data-value="300-800">300–800€</span>
-              <span class="chip" data-value="800-2k">800–2k€</span>
-              <span class="chip" data-value="2k-5k">2k–5k€</span>
-              <span class="chip" data-value=">5k">&gt; 5k€</span>
-              <span class="chip" data-value="sin-definir">Sin definir</span>
-            </div>
-          </div>
-          <div class="field-group">
-            <span class="field-label">¿Cuándo quieres empezar? <span class="req">*</span></span>
-            <div class="chip-group" data-chip-group="urgency" data-required="true">
-              <span class="chip" data-value="ya">Ya</span>
-              <span class="chip" data-value="1-3-meses">1–3 meses</span>
-              <span class="chip" data-value="explorando">Explorando</span>
-            </div>
-          </div>
-          <label class="consent-row">
-            <input type="checkbox" id="f-privacy" name="privacy" required />
-            <span>He leído y acepto la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a>. <span class="req">*</span></span>
+
+        <div class="meta">
+          <label class="privacy">
+            <input type="checkbox" id="f-privacy" required />
+            <span>acepto la <a href="/privacidad.html">privacidad</a></span>
           </label>
-          <input type="text" class="honey" id="f-website2" name="website2" tabindex="-1" autocomplete="off" />
-          <button type="submit" id="f-submit">Solicitar acceso</button>
-          <div class="form-error" id="form-error"></div>
-        </form>
-        <div class="waitlist-success" id="waitlist-success"></div>
-        <p class="waitlist-note">Sin tarjeta. Sin spam. Solo respuesta cuando haya encaje.</p>
-      </aside>
-    </section>
+          <span>sin spam · 1 plaza por turno</span>
+        </div>
 
-    <section>
-      <div class="section-box">
-        <div class="section-kicker">Estado real</div>
-        <h2>Hoy Traxxo no está “100% listo”. Está avanzando fase por fase.</h2>
-        <p class="section-sub">
-          Preferimos ser honestos: la base ya se está construyendo con proyectos reales,
-          pero todavía no es el momento de venderlo como SaaS abierto con tablas de precio y acceso masivo.
-        </p>
-        <div class="stage-grid">
-          <article class="stage-card">
-            <span class="badge badge-live">Vivo ahora</span>
-            <h3>Fase 1 · Recolector</h3>
-            <p>Conexiones, estado de fuentes y captura de datos desde GSC, GA4, Semrush y plataformas web/store.</p>
-          </article>
-          <article class="stage-card">
-            <span class="badge badge-next">Siguiente</span>
-            <h3>Fase 2 · Análisis interno</h3>
-            <p>Lectura operativa, focos, riesgos, oportunidades y trabajo interno del cerebro de Traxxo.</p>
-          </article>
-          <article class="stage-card">
-            <span class="badge badge-later">Después</span>
-            <h3>Fases 3 y 4</h3>
-            <p>Análisis competitivo, thinker y salida final resumida para cliente cuando el sistema esté listo.</p>
-          </article>
-        </div>
-      </div>
-    </section>
+        <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
 
-    <section>
-      <div class="section-box">
-        <div class="section-kicker">Para quién es</div>
-        <h2>Estamos priorizando los primeros proyectos que más nos ayudan a construir bien.</h2>
-        <p class="section-sub">Ahora mismo Traxxo tiene más sentido para equipos donde las conexiones y la lectura operativa importan desde el primer día.</p>
-        <div class="who-grid">
-          <article class="who-card">
-            <h3>E-commerce</h3>
-            <p>Tiendas que necesitan unir SEO, Analytics, Semrush y datos de plataforma sin depender de hojas sueltas.</p>
-          </article>
-          <article class="who-card">
-            <h3>Equipos SEO y founders</h3>
-            <p>Personas que quieren ver qué está conectado, qué falta y cuál debería ser la siguiente etapa real del proyecto.</p>
-          </article>
-          <article class="who-card">
-            <h3>Private beta con feedback</h3>
-            <p>No buscamos volumen. Buscamos proyectos con los que cerrar bien el producto antes de abrirlo de verdad.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-box">
-        <div class="section-kicker">Qué estamos cerrando</div>
-        <h2>La espera no es humo. Es trabajo real de producto.</h2>
-        <div class="fit-grid">
-          <article class="fit-card">
-            <h3>Conexiones y estado</h3>
-            <p>Que Traxxo sepa qué está conectado, qué falta y de dónde debe bajar la información en cada proyecto.</p>
-          </article>
-          <article class="fit-card">
-            <h3>Backend interno Traxxo</h3>
-            <p>Los dashboards de fuente y el análisis interno viven para Traxxo, no para el cliente final.</p>
-          </article>
-          <article class="fit-card">
-            <h3>Salida cliente más limpia</h3>
-            <p>El cliente verá progreso, estado y resultado resumido; no toda la capa operativa del cerebro.</p>
-          </article>
-        </div>
-        <div class="bullet-list">
-          <div class="bullet-item">Consolidando recolector y conexiones reales por tipo de proyecto.</div>
-          <div class="bullet-item">Diseñando el backend interno donde Traxxo ve y maneja toda la data.</div>
-          <div class="bullet-item">Preparando la transición de Fase 1 a Fase 2 sin enseñar todavía el producto como si ya estuviera cerrado.</div>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer-cta">
-      <div class="section-box">
-        <div>
-          <div class="section-kicker">Waitlist</div>
-          <h2>Si quieres entrar cuando abramos nuevas plazas, este es el momento.</h2>
-          <p class="section-sub" style="margin-bottom:0;max-width:540px;">
-            Guarda tu sitio en la lista y te contactaremos cuando Traxxo esté listo para abrir el siguiente grupo de proyectos.
-          </p>
-        </div>
-        <div>
-          <a href="#waitlist" class="nav-cta" style="min-height:48px;padding:0 22px;font-size:14px;">Solicitar acceso</a>
-          <p class="waitlist-note" style="margin-top:14px;">También puedes escribirnos a <a href="mailto:hola@traxxo.ai" style="color:var(--accent);text-decoration:none;">hola@traxxo.ai</a> si quieres contarnos tu caso.</p>
-        </div>
-      </div>
+        <input type="text" name="website2" id="f-website2" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" />
+      </form>
     </div>
   </main>
 
-  <footer>
-    <div>traxxo.ai · private beta</div>
-    <div class="muted-links">
+  <footer class="foot">
+    <div>traxxo.ai · 2026</div>
+    <div class="right">
       <a href="mailto:hola@traxxo.ai">hola@traxxo.ai</a>
-      <a href="/terminos.html">Términos</a>
-      <a href="/privacidad.html">Privacidad</a>
-      <a href="/index-producto.html">Ver landing comercial guardada</a>
+      <a href="/terminos.html">términos</a>
+      <a href="/privacidad.html">privacidad</a>
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+  (function(){
+    'use strict';
+
+    // ============================================================
+    //  MATRIX RAIN with cursor force-field
+    // ============================================================
+    var canvas = document.getElementById('fx');
+    var ctx = canvas.getContext('2d', { alpha: true });
+    var halo = document.querySelector('.halo');
+    var W=0, H=0, DPR=Math.min(window.devicePixelRatio||1, 2);
+
+    // Character set: katakana + binary + a few latin glyphs (Matrix-style)
+    var CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ¦|/\\<>{}[]+=*-_$#@%&'.split('');
+
+    var FONT_SIZE = 16;
+    var columns = [];
+    var pointer = { x: -9999, y: -9999, vx: 0, vy: 0, lastX: 0, lastY: 0, active: false };
+    var FORCE_RADIUS = 180;       // px in CSS units
+    var FORCE_RADIUS_SQ = FORCE_RADIUS*FORCE_RADIUS;
+
+    function resize(){
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W*DPR;
+      canvas.height = H*DPR;
+      canvas.style.width = W+'px';
+      canvas.style.height = H+'px';
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      ctx.font = FONT_SIZE+'px JetBrains Mono, monospace';
+      ctx.textBaseline = 'top';
+
+      // Build columns
+      var cols = Math.ceil(W / FONT_SIZE);
+      columns = new Array(cols);
+      for (var i=0;i<cols;i++){
+        columns[i] = {
+          x: i*FONT_SIZE,
+          y: Math.random()*H,
+          speed: 0.5 + Math.random()*1.4,        // base speed (px per frame at 60fps)
+          length: 6 + Math.floor(Math.random()*22),
+          flicker: Math.random(),
+          headChar: CHARS[(Math.random()*CHARS.length)|0],
+        };
+      }
+    }
+
+    function drawFrame(t){
+      // Soft fade for trailing trails
+      ctx.fillStyle = 'rgba(7,8,10,0.18)';
+      ctx.fillRect(0,0,W,H);
+
+      var px = pointer.x, py = pointer.y, active = pointer.active;
+
+      for (var i=0;i<columns.length;i++){
+        var c = columns[i];
+        var cx = c.x;
+
+        // Distance to pointer for this column's HEAD position
+        var dxh = cx - px, dyh = c.y - py;
+        var dh2 = dxh*dxh + dyh*dyh;
+
+        // Force-field: speed boost near cursor, repulsion sideways
+        var localSpeed = c.speed;
+        var headBrightness = 1;
+        if (active && dh2 < FORCE_RADIUS_SQ){
+          var pull = 1 - Math.sqrt(dh2)/FORCE_RADIUS;        // 0..1
+          localSpeed += pull*5.2;                             // accelerate
+          headBrightness = 1 + pull*1.4;                      // brighter near cursor
+          // tiny horizontal jitter (visual deformation)
+          cx += (Math.sin((t*0.004) + i)*pull*5);
+        }
+
+        c.y += localSpeed;
+        if (c.y > H + c.length*FONT_SIZE){
+          c.y = -Math.random()*200;
+          c.speed = 0.5 + Math.random()*1.4;
+          c.length = 6 + Math.floor(Math.random()*22);
+        }
+
+        // Render the trail (top -> bottom = older -> newer)
+        for (var k=c.length-1; k>=0; k--){
+          var yy = c.y - k*FONT_SIZE;
+          if (yy < -FONT_SIZE || yy > H) continue;
+
+          // tail fades to dark
+          var tail = 1 - (k/c.length);   // 0 (oldest) -> 1 (head)
+          var ch = (k===0) ? c.headChar : CHARS[((Math.random()*CHARS.length)|0)];
+          // change head occasionally
+          if (k===0 && Math.random()<0.07) c.headChar = CHARS[(Math.random()*CHARS.length)|0];
+
+          if (k===0){
+            // HEAD: bright cyan / white
+            var aHead = Math.min(1, 0.9 * headBrightness);
+            ctx.fillStyle = 'rgba(220,255,255,'+aHead+')';
+            ctx.shadowColor = 'rgba(34,211,238,'+(0.6*headBrightness)+')';
+            ctx.shadowBlur = 12*headBrightness;
+            ctx.fillText(ch, cx, yy);
+            ctx.shadowBlur = 0;
+          } else {
+            // TAIL: cyan with falloff
+            var aTail = tail*tail*0.85;
+            // boost brightness if near cursor
+            if (active && dh2 < FORCE_RADIUS_SQ){
+              var pull2 = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
+              aTail = Math.min(1, aTail + pull2*0.35);
+            }
+            ctx.fillStyle = 'rgba(34,211,238,'+aTail+')';
+            ctx.fillText(ch, cx, yy);
+          }
+        }
+      }
+    }
+
+    var rafId=null;
+    function loop(t){
+      drawFrame(t||0);
+      rafId = requestAnimationFrame(loop);
+    }
+
+    // ---------- Pointer tracking + halo ----------
+    function setPointer(x,y){
+      pointer.lastX = pointer.x;
+      pointer.lastY = pointer.y;
+      pointer.x = x;
+      pointer.y = y;
+      pointer.active = true;
+      halo.style.setProperty('--mx', x+'px');
+      halo.style.setProperty('--my', y+'px');
+      halo.style.opacity = '1';
+    }
+    window.addEventListener('mousemove', function(e){ setPointer(e.clientX, e.clientY); }, { passive:true });
+    window.addEventListener('mouseleave', function(){ pointer.active=false; halo.style.opacity='0'; });
+    window.addEventListener('touchmove', function(e){
+      if (e.touches && e.touches[0]) setPointer(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive:true });
+    window.addEventListener('touchend', function(){ pointer.active=false; halo.style.opacity='0'; });
+
+    // ---------- Reduced motion ----------
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    window.addEventListener('resize', resize);
+    resize();
+    if (!reduceMotion) {
+      loop();
+    } else {
+      // Static frame
+      ctx.fillStyle = '#07080a';
+      ctx.fillRect(0,0,W,H);
+    }
+
+    // ============================================================
+    //  WORDMARK glitch on hover/click
+    // ============================================================
+    var wordmark = document.getElementById('wordmark');
+    var glitchTimer=null;
+    function triggerGlitch(){
+      wordmark.classList.remove('glitch');
+      // force reflow
+      void wordmark.offsetWidth;
+      wordmark.classList.add('glitch');
+      clearTimeout(glitchTimer);
+      glitchTimer = setTimeout(function(){ wordmark.classList.remove('glitch'); }, 600);
+    }
+    wordmark.addEventListener('mouseenter', triggerGlitch);
+    wordmark.addEventListener('click', triggerGlitch);
+    // random idle glitch
+    setInterval(function(){ if (Math.random()<0.35 && document.visibilityState==='visible') triggerGlitch(); }, 6000);
+
+    // ============================================================
+    //  FORM submission → Supabase
+    // ============================================================
     var sb = supabase.createClient(
       'https://ghqttckqvjptxhihojey.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4'
     );
 
-    // Chip groups (single-select)
-    document.querySelectorAll('.chip-group').forEach(function(group){
-      group.addEventListener('click', function(e){
-        var chip = e.target.closest('.chip');
-        if (!chip) return;
-        group.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
-        chip.classList.add('active');
-      });
-    });
+    var form = document.getElementById('lead-form');
+    var feedback = document.getElementById('feedback');
+    var emailInput = document.getElementById('f-email');
+    var privacyInput = document.getElementById('f-privacy');
+    var submitBtn = document.getElementById('f-submit');
+    var honeypot = document.getElementById('f-website2');
+    var formWrap = document.getElementById('form-wrap');
 
-    function getChipValue(name) {
-      var group = document.querySelector('.chip-group[data-chip-group="' + name + '"]');
-      var active = group ? group.querySelector('.chip.active') : null;
-      return active ? active.getAttribute('data-value') : null;
+    function setMsg(text, kind){
+      feedback.textContent = text || '';
+      feedback.className = 'feedback' + (kind ? ' '+kind : '');
     }
 
-    function showError(msg) {
-      var el = document.getElementById('form-error');
-      el.textContent = msg;
-      el.style.display = 'block';
+    function showSuccess(email){
+      formWrap.innerHTML =
+        '<div class="success">'+
+          '<div class="ok-mark"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>'+
+          '<h2>estás dentro</h2>'+
+          '<p>te enviaremos novedades a <strong style="color:var(--fg)">'+escapeHtml(email)+'</strong> en cuanto haya un hueco para tu proyecto.</p>'+
+        '</div>';
     }
-    function clearError() {
-      var el = document.getElementById('form-error');
-      el.style.display = 'none';
-      el.textContent = '';
-    }
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c];});}
 
-    async function submitLead(e) {
+    form.addEventListener('submit', async function(e){
       e.preventDefault();
-      clearError();
+      if (honeypot.value) return; // bot
 
-      // Honeypot
-      if (document.getElementById('f-website2').value) return false;
+      var email = emailInput.value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        setMsg('email no válido', 'err');
+        emailInput.focus();
+        return;
+      }
+      if (!privacyInput.checked){
+        setMsg('acepta la privacidad para continuar', 'err');
+        return;
+      }
 
-      var name = document.getElementById('f-name').value.trim();
-      var email = document.getElementById('f-email').value.trim();
-      var domain = document.getElementById('f-domain').value.trim();
-      var context = document.getElementById('f-context').value.trim();
-      var privacy = document.getElementById('f-privacy').checked;
-      var objective = getChipValue('objective');
-      var budget = getChipValue('budget');
-      var urgency = getChipValue('urgency');
-
-      if (!name) { showError('Falta tu nombre.'); return false; }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Email no válido.'); return false; }
-      if (!domain) { showError('Falta la URL de tu web.'); return false; }
-      if (!objective) { showError('Selecciona un objetivo.'); return false; }
-      if (!budget) { showError('Selecciona un presupuesto.'); return false; }
-      if (!urgency) { showError('Indica cuándo quieres empezar.'); return false; }
-      if (!privacy) { showError('Debes aceptar la política de privacidad.'); return false; }
-
-      var btn = document.getElementById('f-submit');
-      btn.disabled = true;
-      var originalText = btn.textContent;
-      btn.textContent = 'Enviando…';
+      submitBtn.disabled = true;
+      var orig = submitBtn.textContent;
+      submitBtn.textContent = 'enviando…';
+      setMsg('');
 
       var payload = {
-        client_name: name,
         client_email: email,
-        domain: domain,
-        objective: objective,
-        context: context || null,
-        budget: budget,
-        urgency: urgency,
         privacy_consent: true
       };
 
-      var result = await sb.from('leads_notify').insert(payload);
-
-      if (result.error) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-        showError('No se pudo enviar. Inténtalo de nuevo o escríbenos a hola@traxxo.ai');
-        return false;
+      try{
+        var result = await sb.from('leads_notify').insert(payload);
+        if (result.error){
+          submitBtn.disabled = false;
+          submitBtn.textContent = orig;
+          setMsg('no se pudo enviar · escríbenos a hola@traxxo.ai', 'err');
+          return;
+        }
+        showSuccess(email);
+      } catch(err){
+        submitBtn.disabled = false;
+        submitBtn.textContent = orig;
+        setMsg('error de red · inténtalo de nuevo', 'err');
       }
-
-      document.getElementById('waitlist-form-main').style.display = 'none';
-      var ok = document.getElementById('waitlist-success');
-      ok.style.display = 'block';
-      ok.innerHTML = '✓ Solicitud recibida.<br>Revisaremos tu proyecto y te escribimos en menos de 48h.';
-      return false;
-    }
+    });
+  })();
   </script>
 </body>
 </html>
