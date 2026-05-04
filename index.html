@@ -33,20 +33,6 @@
     /* ---------- Canvas (Matrix) ---------- */
     #fx{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:radial-gradient(ellipse at 50% 40%, #0b0d12 0%, #07080a 65%, #050608 100%)}
 
-    /* Cursor halo (pure CSS following pointer via JS variables) */
-    .halo{
-      position:fixed;
-      pointer-events:none;
-      z-index:1;
-      width:520px;height:520px;
-      left:var(--mx,50vw);top:var(--my,50vh);
-      transform:translate(-50%,-50%);
-      background:radial-gradient(circle, rgba(34,211,238,.18) 0%, rgba(34,211,238,.06) 28%, rgba(34,211,238,0) 65%);
-      mix-blend-mode:screen;
-      filter:blur(8px);
-      transition:opacity .4s ease;
-    }
-
     /* ---------- Top bar ---------- */
     .top{
       position:fixed;top:0;left:0;right:0;z-index:5;
@@ -254,7 +240,6 @@
 </head>
 <body>
   <canvas id="fx" aria-hidden="true"></canvas>
-  <div class="halo" aria-hidden="true"></div>
 
   <header class="top">
     <div class="brand">
@@ -314,16 +299,30 @@
     // ============================================================
     var canvas = document.getElementById('fx');
     var ctx = canvas.getContext('2d', { alpha: true });
-    var halo = document.querySelector('.halo');
     var W=0, H=0, DPR=Math.min(window.devicePixelRatio||1, 2);
 
-    // Character set: katakana + binary + a few latin glyphs (Matrix-style)
-    var CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍｦｲｸｺｿﾁﾄﾉﾌﾔﾖﾙﾚﾛﾝ¦|/\\<>{}[]+=*-_$#@%&'.split('');
+    // SEO & data tokens: HTTP, métricas, headers, status codes, números
+    var TOKENS = [
+      'GET','POST','200','301','302','404','500','SEO','CTR','ROI','KW','KWs','SERP',
+      'H1','H2','H3','META','ALT','TITLE','URL','DNS','DOM','CSS','API','JSON','XML',
+      'GA4','GSC','UTM','LCP','FCP','CLS','INP','TTFB','RPS','QPS','SSR','CSR',
+      'ROBOTS','SITEMAP','CANON','HREFLANG','SCHEMA','OG','CTA','SKU','EAT','EEAT',
+      'ML','LLM','RAG','NLP','EMB','TOK','VEC','GPT','AI',
+      'IDX','RANK','CRAWL','BOT','SPIDER','LINKS','BACKLINK','ANCHOR','NOFOLLOW',
+      'TRAFFIC','VISITS','BOUNCE','CONV','REV','€','%','$','#','@'
+    ];
+    var DIGITS = '0123456789'.split('');
+    function pickGlyph(){
+      // 35% probability: a single digit (clean rain feel); 65%: a token
+      if (Math.random() < 0.35) return DIGITS[(Math.random()*DIGITS.length)|0];
+      return TOKENS[(Math.random()*TOKENS.length)|0];
+    }
 
-    var FONT_SIZE = 16;
+    var FONT_SIZE = 14;
+    var COL_WIDTH = 64;            // wider than font size: tokens need horizontal room
     var columns = [];
-    var pointer = { x: -9999, y: -9999, vx: 0, vy: 0, lastX: 0, lastY: 0, active: false };
-    var FORCE_RADIUS = 180;       // px in CSS units
+    var pointer = { x: -9999, y: -9999, active: false };
+    var FORCE_RADIUS = 200;
     var FORCE_RADIUS_SQ = FORCE_RADIUS*FORCE_RADIUS;
 
     function resize(){
@@ -334,20 +333,23 @@
       canvas.style.width = W+'px';
       canvas.style.height = H+'px';
       ctx.setTransform(DPR,0,0,DPR,0,0);
-      ctx.font = FONT_SIZE+'px JetBrains Mono, monospace';
+      ctx.font = '600 '+FONT_SIZE+'px JetBrains Mono, ui-monospace, monospace';
       ctx.textBaseline = 'top';
 
-      // Build columns
-      var cols = Math.ceil(W / FONT_SIZE);
+      // Build columns. Each column is a vertical stream; each cell holds one token.
+      var cols = Math.ceil(W / COL_WIDTH);
       columns = new Array(cols);
       for (var i=0;i<cols;i++){
+        var len = 5 + Math.floor(Math.random()*18);
+        var trail = new Array(len);
+        for (var j=0;j<len;j++) trail[j] = pickGlyph();
         columns[i] = {
-          x: i*FONT_SIZE,
+          x: i*COL_WIDTH + 8,
           y: Math.random()*H,
-          speed: 0.5 + Math.random()*1.4,        // base speed (px per frame at 60fps)
-          length: 6 + Math.floor(Math.random()*22),
-          flicker: Math.random(),
-          headChar: CHARS[(Math.random()*CHARS.length)|0],
+          speed: 0.6 + Math.random()*1.6,
+          length: len,
+          trail: trail,
+          stepCounter: 0,
         };
       }
     }
@@ -359,58 +361,62 @@
 
       var px = pointer.x, py = pointer.y, active = pointer.active;
 
+      var ROW_H = FONT_SIZE + 4;
+
       for (var i=0;i<columns.length;i++){
         var c = columns[i];
         var cx = c.x;
 
-        // Distance to pointer for this column's HEAD position
         var dxh = cx - px, dyh = c.y - py;
         var dh2 = dxh*dxh + dyh*dyh;
 
-        // Force-field: speed boost near cursor, repulsion sideways
+        // Force-field: only accelerate (no horizontal jitter, no halo)
         var localSpeed = c.speed;
         var headBrightness = 1;
         if (active && dh2 < FORCE_RADIUS_SQ){
-          var pull = 1 - Math.sqrt(dh2)/FORCE_RADIUS;        // 0..1
-          localSpeed += pull*5.2;                             // accelerate
-          headBrightness = 1 + pull*1.4;                      // brighter near cursor
-          // tiny horizontal jitter (visual deformation)
-          cx += (Math.sin((t*0.004) + i)*pull*5);
+          var pull = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
+          localSpeed += pull*4.5;
+          headBrightness = 1 + pull*1.1;
         }
 
         c.y += localSpeed;
-        if (c.y > H + c.length*FONT_SIZE){
+        if (c.y > H + c.length*ROW_H){
+          // Recycle this column with new tokens
           c.y = -Math.random()*200;
-          c.speed = 0.5 + Math.random()*1.4;
-          c.length = 6 + Math.floor(Math.random()*22);
+          c.speed = 0.6 + Math.random()*1.6;
+          c.length = 5 + Math.floor(Math.random()*18);
+          c.trail = new Array(c.length);
+          for (var jj=0;jj<c.length;jj++) c.trail[jj] = pickGlyph();
         }
 
-        // Render the trail (top -> bottom = older -> newer)
-        for (var k=c.length-1; k>=0; k--){
-          var yy = c.y - k*FONT_SIZE;
-          if (yy < -FONT_SIZE || yy > H) continue;
+        // Cycle the head token periodically so the rain feels alive,
+        // but slow enough that tokens stay readable.
+        c.stepCounter++;
+        if (c.stepCounter > 6 + (i%5)){
+          c.stepCounter = 0;
+          // shift trail down, push new head
+          for (var s=c.length-1;s>0;s--) c.trail[s] = c.trail[s-1];
+          c.trail[0] = pickGlyph();
+        }
 
-          // tail fades to dark
-          var tail = 1 - (k/c.length);   // 0 (oldest) -> 1 (head)
-          var ch = (k===0) ? c.headChar : CHARS[((Math.random()*CHARS.length)|0)];
-          // change head occasionally
-          if (k===0 && Math.random()<0.07) c.headChar = CHARS[(Math.random()*CHARS.length)|0];
+        for (var k=c.length-1; k>=0; k--){
+          var yy = c.y - k*ROW_H;
+          if (yy < -ROW_H || yy > H) continue;
+          var tail = 1 - (k/c.length);
+          var ch = c.trail[k];
 
           if (k===0){
-            // HEAD: bright cyan / white
-            var aHead = Math.min(1, 0.9 * headBrightness);
+            var aHead = Math.min(1, 0.92 * headBrightness);
             ctx.fillStyle = 'rgba(220,255,255,'+aHead+')';
-            ctx.shadowColor = 'rgba(34,211,238,'+(0.6*headBrightness)+')';
-            ctx.shadowBlur = 12*headBrightness;
+            ctx.shadowColor = 'rgba(34,211,238,'+(0.55*headBrightness)+')';
+            ctx.shadowBlur = 10*headBrightness;
             ctx.fillText(ch, cx, yy);
             ctx.shadowBlur = 0;
           } else {
-            // TAIL: cyan with falloff
-            var aTail = tail*tail*0.85;
-            // boost brightness if near cursor
+            var aTail = tail*tail*0.78;
             if (active && dh2 < FORCE_RADIUS_SQ){
               var pull2 = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
-              aTail = Math.min(1, aTail + pull2*0.35);
+              aTail = Math.min(1, aTail + pull2*0.28);
             }
             ctx.fillStyle = 'rgba(34,211,238,'+aTail+')';
             ctx.fillText(ch, cx, yy);
@@ -427,21 +433,16 @@
 
     // ---------- Pointer tracking + halo ----------
     function setPointer(x,y){
-      pointer.lastX = pointer.x;
-      pointer.lastY = pointer.y;
       pointer.x = x;
       pointer.y = y;
       pointer.active = true;
-      halo.style.setProperty('--mx', x+'px');
-      halo.style.setProperty('--my', y+'px');
-      halo.style.opacity = '1';
     }
     window.addEventListener('mousemove', function(e){ setPointer(e.clientX, e.clientY); }, { passive:true });
-    window.addEventListener('mouseleave', function(){ pointer.active=false; halo.style.opacity='0'; });
+    window.addEventListener('mouseleave', function(){ pointer.active=false; });
     window.addEventListener('touchmove', function(e){
       if (e.touches && e.touches[0]) setPointer(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive:true });
-    window.addEventListener('touchend', function(){ pointer.active=false; halo.style.opacity='0'; });
+    window.addEventListener('touchend', function(){ pointer.active=false; });
 
     // ---------- Reduced motion ----------
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
