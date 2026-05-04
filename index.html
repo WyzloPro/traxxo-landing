@@ -325,6 +325,49 @@
     var FORCE_RADIUS = 200;
     var FORCE_RADIUS_SQ = FORCE_RADIUS*FORCE_RADIUS;
 
+    // Safe-zone: rectangle around the central content (wordmark + form).
+    // Inside this rectangle the rain is heavily attenuated so text stays readable.
+    var safeZone = { x:0, y:0, w:0, h:0, fadeX:60, fadeY:60 };
+    function recomputeSafeZone(){
+      var stage = document.querySelector('.stage');
+      if (!stage) return;
+      // Wrap from the top of the glyph badge to the bottom of the form-wrap
+      var top = stage.querySelector('.glyph');
+      var bottom = stage.querySelector('#form-wrap');
+      if (!top || !bottom) return;
+      var t = top.getBoundingClientRect();
+      var b = bottom.getBoundingClientRect();
+      // Use a content-width box centered on the stage
+      var maxW = Math.min(W, 760);
+      var x = (W - maxW)/2;
+      safeZone.x = x;
+      safeZone.y = t.top - 14;
+      safeZone.w = maxW;
+      safeZone.h = (b.bottom + 18) - safeZone.y;
+      // Soft fade margin inside the rectangle (px)
+      safeZone.fadeX = Math.min(80, maxW*0.10);
+      safeZone.fadeY = 50;
+    }
+
+    // Returns 0..1: 0 = fully hidden (deep inside safe zone), 1 = fully visible (outside)
+    function safeZoneVisibility(x, y){
+      var sz = safeZone;
+      if (sz.w === 0) return 1;
+      // distance from rectangle edges (negative if inside)
+      var dx = Math.max(sz.x - x, x - (sz.x + sz.w));
+      var dy = Math.max(sz.y - y, y - (sz.y + sz.h));
+      if (dx >= 0 || dy >= 0) return 1; // outside box on at least one axis -> fully visible
+      // Inside: dx and dy are both negative. Use distance to nearest edge.
+      var inX = -dx, inY = -dy; // depth inside on each axis (positive)
+      // visibility along each axis based on fade band
+      var vx = Math.min(1, inX / sz.fadeX);
+      var vy = Math.min(1, inY / sz.fadeY);
+      // depth = how deep inside the box (in 0..1 sense). Take the minimum: as soon as one
+      // axis is past its fade band, we are fully inside.
+      var depth = Math.min(vx, vy);
+      return 1 - depth; // 1 at edges, 0 deep inside
+    }
+
     function resize(){
       W = window.innerWidth;
       H = window.innerHeight;
@@ -364,6 +407,7 @@
       var ROW_H = FONT_SIZE + 4;
 
       for (var i=0;i<columns.length;i++){
+        // (safe-zone visibility computed per-cell below)
         var c = columns[i];
         var cx = c.x;
 
@@ -405,20 +449,24 @@
           var tail = 1 - (k/c.length);
           var ch = c.trail[k];
 
+          // Safe-zone protection (centered content area)
+          var szVis = safeZoneVisibility(cx, yy);
+          if (szVis <= 0.02) continue; // fully inside safe zone -> skip drawing
+
           if (k===0){
-            // -30% brightness on the head
-            var aHead = Math.min(1, 0.64 * headBrightness);
+            // Head -- a touch dimmer than v4
+            var aHead = Math.min(1, 0.50 * headBrightness * szVis);
             ctx.fillStyle = 'rgba(220,255,255,'+aHead+')';
-            ctx.shadowColor = 'rgba(34,211,238,'+(0.38*headBrightness)+')';
-            ctx.shadowBlur = 7*headBrightness;
+            ctx.shadowColor = 'rgba(34,211,238,'+(0.30*headBrightness*szVis)+')';
+            ctx.shadowBlur = 6*headBrightness*szVis;
             ctx.fillText(ch, cx, yy);
             ctx.shadowBlur = 0;
           } else {
-            // -30% brightness on the trail
-            var aTail = tail*tail*0.55;
+            // Trail -- dimmer
+            var aTail = tail*tail*0.42 * szVis;
             if (active && dh2 < FORCE_RADIUS_SQ){
               var pull2 = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
-              aTail = Math.min(1, aTail + pull2*0.20);
+              aTail = Math.min(1, aTail + pull2*0.16*szVis);
             }
             ctx.fillStyle = 'rgba(34,211,238,'+aTail+')';
             ctx.fillText(ch, cx, yy);
@@ -449,8 +497,19 @@
     // ---------- Reduced motion ----------
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    window.addEventListener('resize', resize);
-    resize();
+    function fullResize(){
+      resize();
+      recomputeSafeZone();
+    }
+    window.addEventListener('resize', fullResize);
+    window.addEventListener('scroll', recomputeSafeZone, { passive:true });
+    fullResize();
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(recomputeSafeZone);
+    }
+    setTimeout(recomputeSafeZone, 600);
+    setTimeout(recomputeSafeZone, 1500);
+
     if (!reduceMotion) {
       loop();
     } else {
