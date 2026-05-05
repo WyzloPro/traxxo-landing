@@ -139,17 +139,17 @@
     }
     .row{
       display:flex;gap:8px;
-      background:rgba(15,17,21,.65);
-      border:1px solid var(--border);
+      background:rgba(12,14,18,.32);                    /* CAMBIADO: era .65 */
+      border:1px solid rgba(255,255,255,.06);           /* CAMBIADO: era var(--border) */
       border-radius:14px;
       padding:6px;
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
+      backdrop-filter:blur(10px);                       /* CAMBIADO: era blur(14px) */
+      -webkit-backdrop-filter:blur(10px);               /* CAMBIADO: era blur(14px) */
       transition:border-color .25s,box-shadow .25s,background .25s;
     }
     .row:focus-within{
       border-color:var(--accent-line);
-      background:rgba(15,20,26,.85);
+      background:rgba(15,20,26,.48);                    /* CAMBIADO: era .85 */
       box-shadow:0 0 0 4px var(--accent-soft),0 12px 40px rgba(34,211,238,.08);
     }
     .row input{
@@ -294,14 +294,10 @@
   (function(){
     'use strict';
 
-    // ============================================================
-    //  MATRIX RAIN with cursor force-field
-    // ============================================================
     var canvas = document.getElementById('fx');
     var ctx = canvas.getContext('2d', { alpha: true });
     var W=0, H=0, DPR=Math.min(window.devicePixelRatio||1, 2);
 
-    // SEO & data tokens: HTTP, métricas, headers, status codes, números
     var TOKENS = [
       'GET','POST','200','301','302','404','500','SEO','CTR','ROI','KW','KWs','SERP',
       'H1','H2','H3','META','ALT','TITLE','URL','DNS','DOM','CSS','API','JSON','XML',
@@ -313,59 +309,47 @@
     ];
     var DIGITS = '0123456789'.split('');
     function pickGlyph(){
-      // 35% probability: a single digit (clean rain feel); 65%: a token
       if (Math.random() < 0.35) return DIGITS[(Math.random()*DIGITS.length)|0];
       return TOKENS[(Math.random()*TOKENS.length)|0];
     }
 
     var FONT_SIZE = 14;
-    var COL_WIDTH = 64;            // wider than font size: tokens need horizontal room
+    var COL_WIDTH = 64;
     var columns = [];
     var pointer = { x: -9999, y: -9999, active: false };
     var FORCE_RADIUS = 200;
     var FORCE_RADIUS_SQ = FORCE_RADIUS*FORCE_RADIUS;
 
-    // Safe-zone: rectangle around the central content (wordmark + form).
-    // Inside this rectangle the rain is heavily attenuated so text stays readable.
     var safeZone = { x:0, y:0, w:0, h:0, fadeX:60, fadeY:60 };
     function recomputeSafeZone(){
       var stage = document.querySelector('.stage');
       if (!stage) return;
-      // Wrap from the top of the glyph badge to the bottom of the form-wrap
       var top = stage.querySelector('.glyph');
       var bottom = stage.querySelector('#form-wrap');
       if (!top || !bottom) return;
       var t = top.getBoundingClientRect();
       var b = bottom.getBoundingClientRect();
-      // Use a content-width box centered on the stage
       var maxW = Math.min(W, 760);
       var x = (W - maxW)/2;
       safeZone.x = x;
       safeZone.y = t.top - 14;
       safeZone.w = maxW;
       safeZone.h = (b.bottom + 18) - safeZone.y;
-      // Soft fade margin inside the rectangle (px)
       safeZone.fadeX = Math.min(80, maxW*0.10);
       safeZone.fadeY = 50;
     }
 
-    // Returns 0..1: 0 = fully hidden (deep inside safe zone), 1 = fully visible (outside)
     function safeZoneVisibility(x, y){
       var sz = safeZone;
       if (sz.w === 0) return 1;
-      // distance from rectangle edges (negative if inside)
       var dx = Math.max(sz.x - x, x - (sz.x + sz.w));
       var dy = Math.max(sz.y - y, y - (sz.y + sz.h));
-      if (dx >= 0 || dy >= 0) return 1; // outside box on at least one axis -> fully visible
-      // Inside: dx and dy are both negative. Use distance to nearest edge.
-      var inX = -dx, inY = -dy; // depth inside on each axis (positive)
-      // visibility along each axis based on fade band
+      if (dx >= 0 || dy >= 0) return 1;
+      var inX = -dx, inY = -dy;
       var vx = Math.min(1, inX / sz.fadeX);
       var vy = Math.min(1, inY / sz.fadeY);
-      // depth = how deep inside the box (in 0..1 sense). Take the minimum: as soon as one
-      // axis is past its fade band, we are fully inside.
       var depth = Math.min(vx, vy);
-      return 1 - depth; // 1 at edges, 0 deep inside
+      return 1 - depth;
     }
 
     function resize(){
@@ -379,7 +363,6 @@
       ctx.font = '600 '+FONT_SIZE+'px JetBrains Mono, ui-monospace, monospace';
       ctx.textBaseline = 'top';
 
-      // Build columns. Each column is a vertical stream; each cell holds one token.
       var cols = Math.ceil(W / COL_WIDTH);
       columns = new Array(cols);
       for (var i=0;i<cols;i++){
@@ -398,23 +381,18 @@
     }
 
     function drawFrame(t){
-      // Soft fade for trailing trails
       ctx.fillStyle = 'rgba(7,8,10,0.18)';
       ctx.fillRect(0,0,W,H);
 
       var px = pointer.x, py = pointer.y, active = pointer.active;
-
       var ROW_H = FONT_SIZE + 4;
 
       for (var i=0;i<columns.length;i++){
-        // (safe-zone visibility computed per-cell below)
         var c = columns[i];
         var cx = c.x;
-
         var dxh = cx - px, dyh = c.y - py;
         var dh2 = dxh*dxh + dyh*dyh;
 
-        // Force-field: only accelerate (no horizontal jitter, no halo)
         var localSpeed = c.speed;
         var headBrightness = 1;
         if (active && dh2 < FORCE_RADIUS_SQ){
@@ -425,7 +403,6 @@
 
         c.y += localSpeed;
         if (c.y > H + c.length*ROW_H){
-          // Recycle this column with new tokens
           c.y = -Math.random()*200;
           c.speed = 0.6 + Math.random()*1.6;
           c.length = 5 + Math.floor(Math.random()*18);
@@ -433,12 +410,9 @@
           for (var jj=0;jj<c.length;jj++) c.trail[jj] = pickGlyph();
         }
 
-        // Cycle the head token periodically so the rain feels alive,
-        // but slow enough that tokens stay readable.
         c.stepCounter++;
         if (c.stepCounter > 6 + (i%5)){
           c.stepCounter = 0;
-          // shift trail down, push new head
           for (var s=c.length-1;s>0;s--) c.trail[s] = c.trail[s-1];
           c.trail[0] = pickGlyph();
         }
@@ -449,12 +423,10 @@
           var tail = 1 - (k/c.length);
           var ch = c.trail[k];
 
-          // Safe-zone protection (centered content area)
           var szVis = safeZoneVisibility(cx, yy);
-          if (szVis <= 0.02) continue; // fully inside safe zone -> skip drawing
+          if (szVis <= 0.02) continue;
 
           if (k===0){
-            // Head -- a touch dimmer than v4
             var aHead = Math.min(1, 0.50 * headBrightness * szVis);
             ctx.fillStyle = 'rgba(220,255,255,'+aHead+')';
             ctx.shadowColor = 'rgba(34,211,238,'+(0.30*headBrightness*szVis)+')';
@@ -462,7 +434,6 @@
             ctx.fillText(ch, cx, yy);
             ctx.shadowBlur = 0;
           } else {
-            // Trail -- dimmer
             var aTail = tail*tail*0.42 * szVis;
             if (active && dh2 < FORCE_RADIUS_SQ){
               var pull2 = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
@@ -481,7 +452,6 @@
       rafId = requestAnimationFrame(loop);
     }
 
-    // ---------- Pointer tracking + halo ----------
     function setPointer(x,y){
       pointer.x = x;
       pointer.y = y;
@@ -494,7 +464,6 @@
     }, { passive:true });
     window.addEventListener('touchend', function(){ pointer.active=false; });
 
-    // ---------- Reduced motion ----------
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function fullResize(){
@@ -513,19 +482,14 @@
     if (!reduceMotion) {
       loop();
     } else {
-      // Static frame
       ctx.fillStyle = '#07080a';
       ctx.fillRect(0,0,W,H);
     }
 
-    // ============================================================
-    //  WORDMARK glitch on hover/click
-    // ============================================================
     var wordmark = document.getElementById('wordmark');
     var glitchTimer=null;
     function triggerGlitch(){
       wordmark.classList.remove('glitch');
-      // force reflow
       void wordmark.offsetWidth;
       wordmark.classList.add('glitch');
       clearTimeout(glitchTimer);
@@ -533,12 +497,8 @@
     }
     wordmark.addEventListener('mouseenter', triggerGlitch);
     wordmark.addEventListener('click', triggerGlitch);
-    // random idle glitch
     setInterval(function(){ if (Math.random()<0.35 && document.visibilityState==='visible') triggerGlitch(); }, 6000);
 
-    // ============================================================
-    //  FORM submission → Supabase
-    // ============================================================
     var sb = supabase.createClient(
       'https://ghqttckqvjptxhihojey.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4'
@@ -569,7 +529,7 @@
 
     form.addEventListener('submit', async function(e){
       e.preventDefault();
-      if (honeypot.value) return; // bot
+      if (honeypot.value) return;
 
       var email = emailInput.value.trim();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
