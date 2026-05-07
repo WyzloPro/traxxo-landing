@@ -139,17 +139,13 @@
     }
     .row{
       display:flex;gap:8px;
-      background:rgba(12,14,18,.32);                    /* CAMBIADO: era .65 */
       border:1px solid rgba(255,255,255,.06);           /* CAMBIADO: era var(--border) */
       border-radius:14px;
       padding:6px;
-      backdrop-filter:blur(10px);                       /* CAMBIADO: era blur(14px) */
-      -webkit-backdrop-filter:blur(10px);               /* CAMBIADO: era blur(14px) */
       transition:border-color .25s,box-shadow .25s,background .25s;
     }
     .row:focus-within{
       border-color:var(--accent-line);
-      background:rgba(15,20,26,.48);                    /* CAMBIADO: era .85 */
       box-shadow:0 0 0 4px var(--accent-soft),0 12px 40px rgba(34,211,238,.08);
     }
     .row input{
