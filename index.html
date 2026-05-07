@@ -335,18 +335,9 @@
       safeZone.fadeY = 50;
     }
 
-    function safeZoneVisibility(x, y){
-      var sz = safeZone;
-      if (sz.w === 0) return 1;
-      var dx = Math.max(sz.x - x, x - (sz.x + sz.w));
-      var dy = Math.max(sz.y - y, y - (sz.y + sz.h));
-      if (dx >= 0 || dy >= 0) return 1;
-      var inX = -dx, inY = -dy;
-      var vx = Math.min(1, inX / sz.fadeX);
-      var vy = Math.min(1, inY / sz.fadeY);
-      var depth = Math.min(vx, vy);
-      return 1 - depth;
-    }
+ function safeZoneVisibility(){
+  return 1;
+}
 
     function resize(){
       W = window.innerWidth;
