@@ -261,7 +261,7 @@
     <div id="form-wrap">
       <form class="form" id="lead-form" autocomplete="on" novalidate>
         <div class="row">
-          <input type="email" id="f-email" name="email" placeholder="tu email" required autocomplete="email" inputmode="email" spellcheck="false" />
+          <input type="email" id="f-email" name="email" placeholder="email de empresa o email de trabajo" required autocomplete="email" inputmode="email" spellcheck="false" />
           <button type="submit" id="f-submit">apuntarme</button>
         </div>
 
@@ -524,7 +524,7 @@
 
       var email = emailInput.value.trim();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-        setMsg('email no válido', 'err');
+        setMsg('introduce tu email de empresa o email de trabajo', 'err');
         emailInput.focus();
         return;
       }
@@ -548,7 +548,7 @@
         if (result.error){
           submitBtn.disabled = false;
           submitBtn.textContent = orig;
-          setMsg('no se pudo enviar · escríbenos a info@traxxo.ai', 'err');
+          setMsg('introduce tu email de empresa o email de trabajo', 'err');
           return;
         }
         showSuccess(email);
