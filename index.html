@@ -31,7 +31,7 @@
     button{font-family:var(--font)}
 
     /* ---------- Canvas (Matrix) ---------- */
-    #fx{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:}
+    #fx{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:var(--bg-2)}
 
     /* ---------- Top bar ---------- */
     .top{
@@ -139,7 +139,7 @@
     }
     .row{
       display:flex;gap:8px;
-      border:1px solid rgba(255,255,255,.06);           /* CAMBIADO: era var(--border) */
+      border:1px solid rgba(255,255,255,.06);
       border-radius:14px;
       padding:6px;
       transition:border-color .25s,box-shadow .25s,background .25s;
@@ -488,7 +488,7 @@
 
     var sb = supabase.createClient(
       'https://ghqttckqvjptxhihojey.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaHF0dGNrcXZqcHR4aGlob2pleSIsInJlZiI6ImdocXR0Y2txdmpwdHhoaWhvamV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NDU1OTYsImV4cCI6MjA5MTIyMTU5Nn0.KlPDplMIIWQwx5oafvkfxbsm0dzPb0cbTJpCM83cqK4'
     );
 
     var form = document.getElementById('lead-form');
