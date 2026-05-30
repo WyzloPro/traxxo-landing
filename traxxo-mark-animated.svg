@@ -1,22 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
     <filter id="runner-glow" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur stdDeviation="1.1" result="blur"/>
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
     <style>
-      .runner{filter:url(#runner-glow);opacity:.86}
+      .runner{filter:url(#runner-glow);opacity:.92}
       @media (prefers-reduced-motion:reduce){.runner{display:none}}
     </style>
   </defs>
-  <rect width="32" height="32" rx="8" fill="#09090b"/>
-  <rect width="32" height="32" rx="8" fill="#22d3ee" fill-opacity="0.14"/>
-  <path id="signal-path" d="M6 16h5.5l2.5-6 2.5 12 2.5-6H26" stroke="#22d3ee" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <circle class="runner" r="1.05" fill="#eaffff">
-    <animateMotion dur="3.2s" repeatCount="indefinite" rotate="auto">
+
+  <path
+    id="signal-path"
+    d="M4 16h7l2.2-5.4 2.4 10.8 2.3-5.4H28"
+    stroke="#22d3ee"
+    stroke-width="2.15"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+
+  <circle class="runner" r="1.45" fill="#eaffff">
+    <animateMotion dur="3s" repeatCount="indefinite" rotate="auto">
       <mpath href="#signal-path"/>
     </animateMotion>
   </circle>
