@@ -44,8 +44,8 @@
     .top > *{pointer-events:auto}
     .brand{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:600;letter-spacing:.5px}
     .brand-logo{
-      width:32px;height:32px;border-radius:8px;display:block;
-      box-shadow:0 0 16px rgba(34,211,238,.18),0 0 36px rgba(34,211,238,.10);
+      width:32px;height:32px;display:block;background:transparent;
+      filter:drop-shadow(0 0 10px rgba(34,211,238,.22));
     }
     .brand-name{font-size:14px;color:var(--fg)}
     .top-link{
@@ -242,7 +242,7 @@
 
   <header class="top">
     <div class="brand">
-      <img src="/traxxo-mark-animated.svg" class="brand-logo" alt="Traxxo" width="32" height="32" />
+      <img src="/traxxo-mark-animated.svg?v=2" class="brand-logo" alt="Traxxo" width="32" height="32" />
       <span class="brand-name">traxxo</span>
     </div>
     <a href="https://app.traxxo.ai" class="top-link">login →</a>
