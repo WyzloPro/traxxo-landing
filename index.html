@@ -240,10 +240,33 @@
     @media (prefers-reduced-motion:reduce){
       .glyph,.wordmark,.tagline,.form{opacity:1!important;animation:none!important}
     }
+
+    /* ---------- Traxxo Touch Field ---------- */
+    #traxxo-touch-field{
+      position:fixed;
+      inset:0;
+      z-index:6;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    #traxxo-touch-canvas{
+      width:100%;
+      height:100%;
+      display:block;
+      pointer-events:none;
+    }
+    @media (prefers-reduced-motion:reduce){
+      #traxxo-touch-field{display:none}
+      #traxxo-touch-canvas{display:none}
+    }
+
   </style>
 </head>
 <body>
   <canvas id="fx" aria-hidden="true"></canvas>
+  <div id="traxxo-touch-field" aria-hidden="true">
+    <canvas id="traxxo-touch-canvas"></canvas>
+  </div>
 
   <header class="top">
     <div class="brand">
@@ -562,6 +585,172 @@
         setMsg('error de red · inténtalo de nuevo', 'err');
       }
     });
+  })();
+  </script>
+
+  <script>
+  (function(){
+    'use strict';
+
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var canvas = document.getElementById('traxxo-touch-canvas');
+    if (!canvas || reduceMotion) return;
+
+    var ctx = canvas.getContext('2d', { alpha:true });
+    var W = 0;
+    var H = 0;
+    var DPR = Math.min(window.devicePixelRatio || 1, 2);
+    var target = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5, force: 0 };
+    var field = { x: target.x, y: target.y, force: 0, ring: 0, pulse: 0 };
+    var nodes = [];
+    var lastInput = 0;
+    var raf = null;
+
+    function resize(){
+      W = window.innerWidth;
+      H = window.innerHeight;
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(W * DPR));
+      canvas.height = Math.max(1, Math.floor(H * DPR));
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+
+    function touchPoint(e){
+      if (e.touches && e.touches[0]) return e.touches[0];
+      if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
+      return e;
+    }
+
+    function createNodes(x, y){
+      nodes.length = 0;
+      var total = 12;
+      for (var i = 0; i < total; i++){
+        var angle = (Math.PI * 2 / total) * i + (Math.random() * 0.5 - 0.25);
+        var radius = 74 + Math.random() * 92;
+        nodes.push({
+          angle: angle,
+          radius: radius,
+          drift: Math.random() * Math.PI * 2,
+          size: 1.2 + Math.random() * 1.9,
+          life: 0.35 + Math.random() * 0.65,
+          label: ['SEO','CTR','SERP','AI','KW','URL'][i % 6]
+        });
+      }
+    }
+
+    function press(x, y, strong){
+      target.x = x;
+      target.y = y;
+      target.force = strong ? 1 : 0.78;
+      lastInput = performance.now();
+      if (!nodes.length || Math.hypot(field.x - x, field.y - y) > 110) createNodes(x, y);
+    }
+
+    function release(){
+      target.force = 0;
+    }
+
+    function drawDepression(x, y, force){
+      var radius = 130 + force * 90;
+      var hollow = ctx.createRadialGradient(x, y, 4, x, y, radius);
+      hollow.addColorStop(0, 'rgba(7,8,10,' + (0.28 * force).toFixed(3) + ')');
+      hollow.addColorStop(0.32, 'rgba(34,211,238,' + (0.12 * force).toFixed(3) + ')');
+      hollow.addColorStop(0.66, 'rgba(14,165,233,' + (0.045 * force).toFixed(3) + ')');
+      hollow.addColorStop(1, 'rgba(34,211,238,0)');
+      ctx.fillStyle = hollow;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      var shine = ctx.createRadialGradient(x - radius * 0.24, y - radius * 0.28, 0, x, y, radius * 0.9);
+      shine.addColorStop(0, 'rgba(255,255,255,' + (0.11 * force).toFixed(3) + ')');
+      shine.addColorStop(0.38, 'rgba(34,211,238,' + (0.05 * force).toFixed(3) + ')');
+      shine.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = shine;
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 0.72, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawWave(x, y, force){
+      field.ring = (field.ring + 1.6 + force * 2.2) % 120;
+      var radius = 52 + field.ring + force * 36;
+      var opacity = Math.max(0, (1 - field.ring / 120) * force);
+      ctx.strokeStyle = 'rgba(34,211,238,' + (0.28 * opacity).toFixed(3) + ')';
+      ctx.lineWidth = 1 + force * 1.8;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.08 * force).toFixed(3) + ')';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(x, y, 38 + force * 24, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawSignals(x, y, force){
+      ctx.font = '600 9px JetBrains Mono, ui-monospace, monospace';
+      ctx.textBaseline = 'middle';
+      ctx.lineCap = 'round';
+      for (var i = 0; i < nodes.length; i++){
+        var n = nodes[i];
+        n.drift += 0.012 + force * 0.018;
+        n.life += (force - n.life) * 0.04;
+        var wobble = Math.sin(n.drift) * 7;
+        var nx = x + Math.cos(n.angle) * (n.radius + wobble);
+        var ny = y + Math.sin(n.angle) * (n.radius + wobble);
+        var alpha = Math.max(0, Math.min(1, n.life * force));
+
+        ctx.strokeStyle = 'rgba(34,211,238,' + (0.16 * alpha).toFixed(3) + ')';
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(x + Math.cos(n.angle) * 34, y + Math.sin(n.angle) * 34);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(34,211,238,' + (0.55 * alpha).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(nx, ny, n.size + force * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(225,250,252,' + (0.26 * alpha).toFixed(3) + ')';
+        ctx.fillText(n.label, nx + 7, ny);
+      }
+    }
+
+    function frame(now){
+      ctx.clearRect(0, 0, W, H);
+      if (now - lastInput > 700) target.force *= 0.94;
+      field.x += (target.x - field.x) * 0.18;
+      field.y += (target.y - field.y) * 0.18;
+      field.force += (target.force - field.force) * 0.12;
+      field.pulse += 0.02;
+
+      var force = Math.max(0, Math.min(1, field.force));
+      if (force > 0.015){
+        var breathing = 1 + Math.sin(field.pulse) * 0.025;
+        drawDepression(field.x, field.y, force * breathing);
+        drawWave(field.x, field.y, force);
+        drawSignals(field.x, field.y, force);
+      }
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', resize, { passive:true });
+    window.addEventListener('pointermove', function(e){ press(e.clientX, e.clientY, e.pressure && e.pressure > 0 ? true : false); }, { passive:true });
+    window.addEventListener('pointerdown', function(e){ press(e.clientX, e.clientY, true); }, { passive:true });
+    window.addEventListener('pointerup', release, { passive:true });
+    window.addEventListener('pointercancel', release, { passive:true });
+    window.addEventListener('mouseleave', release, { passive:true });
+    window.addEventListener('blur', release, { passive:true });
+    window.addEventListener('touchmove', function(e){ var p = touchPoint(e); press(p.clientX, p.clientY, true); }, { passive:true });
+    window.addEventListener('touchend', release, { passive:true });
+
+    resize();
+    raf = window.requestAnimationFrame(frame);
   })();
   </script>
 </body>
