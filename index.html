@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-theme="dark" data-theme-choice="system">
+<html lang="es" data-theme="dark" data-theme-choice="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
@@ -12,7 +12,7 @@
   <script>
   (function(){
     try{
-      var choice = localStorage.getItem('traxxo-theme') || 'system';
+      var choice = localStorage.getItem('traxxo-theme') || 'dark';
       var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
       var resolved = choice === 'system' ? (prefersLight ? 'light' : 'dark') : choice;
       document.documentElement.setAttribute('data-theme', resolved);
@@ -317,9 +317,9 @@
     </div>
     <div class="top-actions">
       <div class="theme-switch" role="group" aria-label="apariencia">
-        <button type="button" data-theme-choice="system" aria-pressed="true">auto</button>
+        <button type="button" data-theme-choice="system" aria-pressed="false">auto</button>
         <button type="button" data-theme-choice="light" aria-pressed="false">claro</button>
-        <button type="button" data-theme-choice="dark" aria-pressed="false">oscuro</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="true">oscuro</button>
       </div>
       <a href="https://app.traxxo.ai" class="top-link">login →</a>
     </div>
@@ -378,7 +378,7 @@
     }
 
     function apply(choice, persist){
-      choice = choice || 'system';
+      choice = choice || 'dark';
       var resolved = resolve(choice);
       document.documentElement.setAttribute('data-theme', resolved);
       document.documentElement.setAttribute('data-theme-choice', choice);
@@ -398,15 +398,15 @@
 
     if (media) {
       var onSystemChange = function(){
-        var current = localStorage.getItem(KEY) || 'system';
+        var current = localStorage.getItem(KEY) || 'dark';
         if (current === 'system') apply('system', false);
       };
       if (media.addEventListener) media.addEventListener('change', onSystemChange);
       else if (media.addListener) media.addListener(onSystemChange);
     }
 
-    try { apply(localStorage.getItem(KEY) || 'system', false); }
-    catch(err) { apply('system', false); }
+    try { apply(localStorage.getItem(KEY) || 'dark', false); }
+    catch(err) { apply('dark', false); }
   })();
   </script>
 
