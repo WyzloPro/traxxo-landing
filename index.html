@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es" data-theme="dark" data-theme-choice="dark">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
@@ -9,20 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
-  <script>
-  (function(){
-    try{
-      var choice = localStorage.getItem('traxxo-theme') || 'dark';
-      var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-      var resolved = choice === 'system' ? (prefersLight ? 'light' : 'dark') : choice;
-      document.documentElement.setAttribute('data-theme', resolved);
-      document.documentElement.setAttribute('data-theme-choice', choice);
-    } catch(err) {}
-  })();
-  </script>
   <style>
     :root{
-      color-scheme:dark;
       --bg:#09090b;
       --bg-2:#07080a;
       --fg:#fafafa;
@@ -37,75 +25,34 @@
       --font:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
       --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
     }
-    html[data-theme="light"]{
-      color-scheme:light;
-      --bg:#f7fafc;
-      --bg-2:#f8fafc;
-      --fg:#071014;
-      --muted:#64748b;
-      --dim:#334155;
-      --accent:#0284c7;
-      --accent-soft:rgba(2,132,199,.08);
-      --accent-line:rgba(2,132,199,.26);
-      --border:#d7e0ea;
-      --ok:#059669;
-      --err:#dc2626;
-    }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow:hidden;transition:background .25s ease,color .25s ease}
+    html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow:hidden}
     a{color:inherit;text-decoration:none}
     button{font-family:var(--font)}
 
     /* ---------- Canvas (Matrix) ---------- */
-    #fx{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:var(--bg-2);transition:background .25s ease}
+    #fx{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;background:var(--bg-2)}
 
     /* ---------- Top bar ---------- */
     .top{
       position:fixed;top:0;left:0;right:0;z-index:5;
-      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      display:flex;align-items:center;justify-content:space-between;
       padding:18px 28px;
       pointer-events:none;
       background:linear-gradient(180deg, rgba(7,8,10,.85) 0%, rgba(7,8,10,.4) 70%, rgba(7,8,10,0) 100%);
-      transition:background .25s ease;
     }
-    html[data-theme="light"] .top{background:linear-gradient(180deg, rgba(248,250,252,.88) 0%, rgba(248,250,252,.46) 70%, rgba(248,250,252,0) 100%)}
     .top > *{pointer-events:auto}
-    .brand{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:600;letter-spacing:.5px;min-width:0}
+    .brand{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:600;letter-spacing:.5px}
     .brand-logo{
       width:32px;height:32px;display:block;background:transparent;
       filter:drop-shadow(0 0 10px rgba(34,211,238,.22));
     }
-    html[data-theme="light"] .brand-logo{filter:drop-shadow(0 0 10px rgba(2,132,199,.14))}
     .brand-name{font-size:14px;color:var(--fg)}
     .brand-name .x{color:var(--accent);text-shadow:0 0 10px rgba(34,211,238,.35),0 0 24px rgba(34,211,238,.18)}
-    html[data-theme="light"] .brand-name .x{text-shadow:0 0 10px rgba(2,132,199,.18),0 0 20px rgba(2,132,199,.10)}
-    .top-actions{display:flex;align-items:center;gap:10px;pointer-events:auto}
-    .theme-switch{
-      display:flex;align-items:center;gap:2px;
-      padding:3px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      background:rgba(255,255,255,.03);
-      backdrop-filter:blur(12px);
-    }
-    html[data-theme="light"] .theme-switch{background:rgba(255,255,255,.62);box-shadow:0 10px 30px rgba(15,23,42,.05)}
-    .theme-switch button{
-      appearance:none;border:0;background:transparent;color:var(--muted);
-      border-radius:999px;padding:6px 9px;
-      font-family:var(--mono);font-size:10px;line-height:1;
-      cursor:pointer;transition:background .2s,color .2s,box-shadow .2s;
-    }
-    .theme-switch button:hover{color:var(--accent)}
-    html[data-theme-choice="system"] .theme-switch [data-theme-choice="system"],
-    html[data-theme-choice="light"] .theme-switch [data-theme-choice="light"],
-    html[data-theme-choice="dark"] .theme-switch [data-theme-choice="dark"]{
-      color:var(--fg);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent-line);
-    }
     .top-link{
       font-family:var(--mono);font-size:12px;color:var(--dim);
       padding:8px 14px;border:1px solid var(--border);border-radius:999px;
       transition:color .2s,border-color .2s,background .2s;
-      white-space:nowrap;
     }
     .top-link:hover{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
 
@@ -140,7 +87,6 @@
       text-shadow:0 0 24px rgba(34,211,238,.35),0 0 60px rgba(34,211,238,.18);
       position:relative;display:inline-block;
     }
-    html[data-theme="light"] .wordmark .x{text-shadow:0 0 22px rgba(2,132,199,.15),0 0 46px rgba(2,132,199,.08)}
     .wordmark::before,.wordmark::after{
       content:attr(data-text);
       position:absolute;inset:0;
@@ -197,12 +143,10 @@
       padding:6px;
       transition:border-color .25s,box-shadow .25s,background .25s;
     }
-    html[data-theme="light"] .row{border-color:rgba(15,23,42,.08);background:rgba(255,255,255,.58);box-shadow:0 18px 50px rgba(15,23,42,.06)}
     .row:focus-within{
       border-color:var(--accent-line);
       box-shadow:0 0 0 4px var(--accent-soft),0 12px 40px rgba(34,211,238,.08);
     }
-    html[data-theme="light"] .row:focus-within{box-shadow:0 0 0 4px var(--accent-soft),0 14px 44px rgba(2,132,199,.10)}
     .row input{
       flex:1;min-width:0;
       background:transparent;border:0;outline:0;
@@ -216,9 +160,7 @@
       cursor:pointer;transition:transform .15s ease,box-shadow .25s ease,filter .2s;
       box-shadow:0 0 0 0 rgba(34,211,238,.5);
     }
-    html[data-theme="light"] .row button{color:#f8fafc;box-shadow:0 12px 30px rgba(2,132,199,.12)}
     .row button:hover{filter:brightness(1.08);box-shadow:0 0 30px rgba(34,211,238,.35)}
-    html[data-theme="light"] .row button:hover{box-shadow:0 14px 34px rgba(2,132,199,.22)}
     .row button:active{transform:translateY(1px)}
     .row button:disabled{opacity:.6;cursor:wait}
 
@@ -228,7 +170,6 @@
       padding:2px 8px 0;
     }
     .meta a{color:var(--dim);border-bottom:1px dotted rgba(255,255,255,.15);padding-bottom:1px;transition:color .2s}
-    html[data-theme="light"] .meta a{border-color:rgba(15,23,42,.18)}
     .meta a:hover{color:var(--accent);border-color:var(--accent-line)}
     .privacy{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
     .privacy input{accent-color:var(--accent);width:13px;height:13px}
@@ -251,7 +192,6 @@
       backdrop-filter:blur(14px);
       animation:popIn .55s cubic-bezier(.2,.9,.3,1.2);
     }
-    html[data-theme="light"] .success{background:linear-gradient(180deg, rgba(2,132,199,.07), rgba(255,255,255,.62));box-shadow:0 18px 50px rgba(15,23,42,.08)}
     @keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
     .success h2{font-size:22px;margin:0 0 10px;font-weight:700;letter-spacing:-.01em}
     .success p{font-size:14px;color:var(--dim);margin:0;line-height:1.6}
@@ -270,9 +210,7 @@
       font-family:var(--mono);font-size:11px;color:var(--muted);
       pointer-events:none;
       background:linear-gradient(180deg, rgba(7,8,10,0) 0%, rgba(7,8,10,.85) 60%, rgba(7,8,10,1) 100%);
-      transition:background .25s ease;
     }
-    html[data-theme="light"] .foot{background:linear-gradient(180deg, rgba(248,250,252,0) 0%, rgba(248,250,252,.86) 60%, rgba(248,250,252,1) 100%)}
     .foot a{pointer-events:auto;transition:color .2s}
     .foot a:hover{color:var(--accent)}
     .foot .right{display:flex;gap:18px}
@@ -283,10 +221,8 @@
     }
 
     @media (max-width:560px){
-      .top{padding:14px 18px;align-items:flex-start}
+      .top{padding:14px 18px}
       .top-link{font-size:11px;padding:7px 11px}
-      .top-actions{gap:7px;flex-direction:column;align-items:flex-end}
-      .theme-switch button{font-size:9px;padding:5px 7px}
       .brand{gap:12px}
       .brand-logo{width:36px;height:36px}
       .stage{padding:90px 20px 80px}
@@ -315,14 +251,7 @@
       <img src="/traxxo-mark-animated.svg?v=2" class="brand-logo" alt="Traxxo" width="32" height="32" />
       <span class="brand-name">tra<span class="x">x</span>xo</span>
     </div>
-    <div class="top-actions">
-      <div class="theme-switch" role="group" aria-label="apariencia">
-        <button type="button" data-theme-choice="system" aria-pressed="false">auto</button>
-        <button type="button" data-theme-choice="light" aria-pressed="false">claro</button>
-        <button type="button" data-theme-choice="dark" aria-pressed="true">oscuro</button>
-      </div>
-      <a href="https://app.traxxo.ai" class="top-link">login →</a>
-    </div>
+    <a href="https://app.traxxo.ai" class="top-link">login →</a>
   </header>
 
   <main class="stage">
@@ -365,51 +294,6 @@
     </div>
   </footer>
 
-  <script>
-  (function(){
-    'use strict';
-    var KEY = 'traxxo-theme';
-    var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-theme-choice]'));
-    var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
-
-    function resolve(choice){
-      if (choice === 'light' || choice === 'dark') return choice;
-      return media && media.matches ? 'light' : 'dark';
-    }
-
-    function apply(choice, persist){
-      choice = choice || 'dark';
-      var resolved = resolve(choice);
-      document.documentElement.setAttribute('data-theme', resolved);
-      document.documentElement.setAttribute('data-theme-choice', choice);
-      buttons.forEach(function(button){
-        var active = button.getAttribute('data-theme-choice') === choice;
-        button.setAttribute('aria-pressed', active ? 'true' : 'false');
-      });
-      if (persist) {
-        try { localStorage.setItem(KEY, choice); } catch(err) {}
-      }
-      window.dispatchEvent(new CustomEvent('traxxo-theme-change', { detail:{ choice:choice, theme:resolved } }));
-    }
-
-    buttons.forEach(function(button){
-      button.addEventListener('click', function(){ apply(button.getAttribute('data-theme-choice'), true); });
-    });
-
-    if (media) {
-      var onSystemChange = function(){
-        var current = localStorage.getItem(KEY) || 'dark';
-        if (current === 'system') apply('system', false);
-      };
-      if (media.addEventListener) media.addEventListener('change', onSystemChange);
-      else if (media.addListener) media.addListener(onSystemChange);
-    }
-
-    try { apply(localStorage.getItem(KEY) || 'dark', false); }
-    catch(err) { apply('dark', false); }
-  })();
-  </script>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
   (function(){
@@ -432,10 +316,6 @@
     function pickGlyph(){
       if (Math.random() < 0.35) return DIGITS[(Math.random()*DIGITS.length)|0];
       return TOKENS[(Math.random()*TOKENS.length)|0];
-    }
-
-    function isLightTheme(){
-      return document.documentElement.getAttribute('data-theme') === 'light';
     }
 
     var FONT_SIZE = 14;
@@ -468,11 +348,6 @@
       return 1;
     }
 
-    function clearCanvas(){
-      ctx.fillStyle = isLightTheme() ? '#f8fafc' : '#07080a';
-      ctx.fillRect(0,0,W,H);
-    }
-
     function resize(){
       W = window.innerWidth;
       H = window.innerHeight;
@@ -499,12 +374,10 @@
           stepCounter: 0,
         };
       }
-      clearCanvas();
     }
 
     function drawFrame(t){
-      var light = isLightTheme();
-      ctx.fillStyle = light ? 'rgba(248,250,252,0.22)' : 'rgba(7,8,10,0.18)';
+      ctx.fillStyle = 'rgba(7,8,10,0.18)';
       ctx.fillRect(0,0,W,H);
 
       var px = pointer.x, py = pointer.y, active = pointer.active;
@@ -550,19 +423,19 @@
           if (szVis <= 0.02) continue;
 
           if (k===0){
-            var aHead = Math.min(1, (light ? 0.30 : 0.50) * headBrightness * szVis);
-            ctx.fillStyle = light ? 'rgba(15,23,42,'+aHead+')' : 'rgba(220,255,255,'+aHead+')';
-            ctx.shadowColor = light ? 'rgba(2,132,199,'+(0.16*headBrightness*szVis)+')' : 'rgba(34,211,238,'+(0.30*headBrightness*szVis)+')';
-            ctx.shadowBlur = (light ? 4 : 6)*headBrightness*szVis;
+            var aHead = Math.min(1, 0.50 * headBrightness * szVis);
+            ctx.fillStyle = 'rgba(220,255,255,'+aHead+')';
+            ctx.shadowColor = 'rgba(34,211,238,'+(0.30*headBrightness*szVis)+')';
+            ctx.shadowBlur = 6*headBrightness*szVis;
             ctx.fillText(ch, cx, yy);
             ctx.shadowBlur = 0;
           } else {
-            var aTail = tail*tail*(light ? 0.20 : 0.42) * szVis;
+            var aTail = tail*tail*0.42 * szVis;
             if (active && dh2 < FORCE_RADIUS_SQ){
               var pull2 = 1 - Math.sqrt(dh2)/FORCE_RADIUS;
-              aTail = Math.min(1, aTail + pull2*(light ? 0.08 : 0.16)*szVis);
+              aTail = Math.min(1, aTail + pull2*0.16*szVis);
             }
-            ctx.fillStyle = light ? 'rgba(2,132,199,'+aTail+')' : 'rgba(34,211,238,'+aTail+')';
+            ctx.fillStyle = 'rgba(34,211,238,'+aTail+')';
             ctx.fillText(ch, cx, yy);
           }
         }
@@ -586,7 +459,6 @@
       if (e.touches && e.touches[0]) setPointer(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive:true });
     window.addEventListener('touchend', function(){ pointer.active=false; });
-    window.addEventListener('traxxo-theme-change', clearCanvas);
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -606,7 +478,8 @@
     if (!reduceMotion) {
       loop();
     } else {
-      clearCanvas();
+      ctx.fillStyle = '#07080a';
+      ctx.fillRect(0,0,W,H);
     }
 
     var wordmark = document.getElementById('wordmark');
