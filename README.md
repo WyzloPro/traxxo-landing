@@ -12,7 +12,7 @@ El registro público en `app.traxxo.ai` está cerrado hasta tener ≥4 proyectos
 
 ```
 traxxo-landing/
-├── index.html              # landing minimal con animación matrix de tokens SEO/datos
+├── index.html              # landing minimal con animación matrix + overlay táctil visual
 ├── en.html                 # landing en inglés (versión anterior, sin actualizar a v2)
 ├── index-producto.html     # landing comercial completa archivada (v1)
 ├── en-product.html         # landing comercial en inglés archivada
@@ -42,6 +42,24 @@ Solo dos campos son obligatorios desde la landing actual: `client_email` y `priv
 Lluvia tipo matrix con **tokens SEO/IA** (`SEO`, `CTR`, `H1`, `META`, `GA4`, `GSC`, `LCP`, `LLM`, `RAG`, `CRAWL`, `BACKLINK`, `NOFOLLOW`, `TRAFFIC`, `200`, `301`, `404`…). Los caracteres aceleran y brillan más cerca del cursor. Una safe-zone rectangular centrada protege el wordmark, el formulario y el resto del contenido — los tokens no se pintan dentro de esa zona, con un fade suave en los bordes.
 
 Implementación en canvas 2D, vanilla JS, ~500 líneas. Honra `prefers-reduced-motion`.
+
+## Traxxo Touch Field
+
+Overlay visual táctil añadido sobre el home público como capa independiente. Simula una membrana elástica: al mover el cursor o tocar la pantalla aparece una depresión circular, ondas suaves y pequeñas señales alrededor del punto de contacto.
+
+Reglas de protección del cambio:
+
+- Es solo frontend visual.
+- No modifica backend.
+- No modifica Supabase.
+- No modifica formulario.
+- No modifica rutas.
+- No modifica login.
+- No reemplaza el canvas Matrix `#fx`.
+- La capa usa `pointer-events: none` para no bloquear inputs, botones ni links.
+- Honra `prefers-reduced-motion`.
+
+Nota de testing: en el entorno donde se preparó el cambio no se pudo capturar screenshot automático porque Playwright/Chromium no pudo instalarse; el registry devolvió `403 Forbidden`. La validación visual debe hacerse en preview/producción desde navegador.
 
 ## Deploy
 
