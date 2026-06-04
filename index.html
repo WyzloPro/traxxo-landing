@@ -245,9 +245,11 @@
     #traxxo-touch-field{
       position:fixed;
       inset:0;
-      z-index:6;
+      z-index:1;
       pointer-events:none;
       overflow:hidden;
+      opacity:.56;
+      mix-blend-mode:screen;
     }
     #traxxo-touch-canvas{
       width:100%;
@@ -366,9 +368,9 @@
       safeZone.fadeY = 50;
     }
 
- function safeZoneVisibility(){
-  return 1;
-}
+    function safeZoneVisibility(){
+      return 1;
+    }
 
     function resize(){
       W = window.innerWidth;
@@ -600,11 +602,11 @@
     var W = 0;
     var H = 0;
     var DPR = Math.min(window.devicePixelRatio || 1, 2);
-    var target = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5, force: 0 };
-    var field = { x: target.x, y: target.y, force: 0, ring: 0, pulse: 0 };
-    var nodes = [];
+    var tick = 0;
+    var glyphs = ['SEO','CTR','KW','SERP','AI','URL','200','301','404','LLM','RAG','BOT'];
+    var target = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5, force: 0, press: 0 };
+    var field = { x: target.x, y: target.y, force: 0, press: 0 };
     var lastInput = 0;
-    var raf = null;
 
     function resize(){
       W = window.innerWidth;
@@ -617,140 +619,119 @@
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     }
 
-    function touchPoint(e){
+    function point(e){
       if (e.touches && e.touches[0]) return e.touches[0];
       if (e.changedTouches && e.changedTouches[0]) return e.changedTouches[0];
       return e;
     }
 
-    function createNodes(x, y){
-      nodes.length = 0;
-      var total = 12;
-      for (var i = 0; i < total; i++){
-        var angle = (Math.PI * 2 / total) * i + (Math.random() * 0.5 - 0.25);
-        var radius = 74 + Math.random() * 92;
-        nodes.push({
-          angle: angle,
-          radius: radius,
-          drift: Math.random() * Math.PI * 2,
-          size: 1.2 + Math.random() * 1.9,
-          life: 0.35 + Math.random() * 0.65,
-          label: ['SEO','CTR','SERP','AI','KW','URL'][i % 6]
-        });
-      }
-    }
-
-    function press(x, y, strong){
+    function setInput(x, y, strong){
       target.x = x;
       target.y = y;
-      target.force = strong ? 1 : 0.78;
+      target.force = strong ? 0.72 : 0.46;
+      target.press = strong ? 0.8 : 0.22;
       lastInput = performance.now();
-      if (!nodes.length || Math.hypot(field.x - x, field.y - y) > 110) createNodes(x, y);
     }
 
     function release(){
       target.force = 0;
+      target.press = 0;
     }
 
-    function drawDepression(x, y, force){
-      var radius = 130 + force * 90;
-      var hollow = ctx.createRadialGradient(x, y, 4, x, y, radius);
-      hollow.addColorStop(0, 'rgba(7,8,10,' + (0.28 * force).toFixed(3) + ')');
-      hollow.addColorStop(0.32, 'rgba(34,211,238,' + (0.12 * force).toFixed(3) + ')');
-      hollow.addColorStop(0.66, 'rgba(14,165,233,' + (0.045 * force).toFixed(3) + ')');
-      hollow.addColorStop(1, 'rgba(34,211,238,0)');
-      ctx.fillStyle = hollow;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fill();
+    function drawDataWake(x, y, force, press){
+      var colWidth = 64;
+      var rowH = 18;
+      var baseCol = Math.round((x - 8) / colWidth) * colWidth + 8;
+      var nowStep = Math.floor(tick / 9);
 
-      var shine = ctx.createRadialGradient(x - radius * 0.24, y - radius * 0.28, 0, x, y, radius * 0.9);
-      shine.addColorStop(0, 'rgba(255,255,255,' + (0.11 * force).toFixed(3) + ')');
-      shine.addColorStop(0.38, 'rgba(34,211,238,' + (0.05 * force).toFixed(3) + ')');
-      shine.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = shine;
-      ctx.beginPath();
-      ctx.arc(x, y, radius * 0.72, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    function drawWave(x, y, force){
-      field.ring = (field.ring + 1.6 + force * 2.2) % 120;
-      var radius = 52 + field.ring + force * 36;
-      var opacity = Math.max(0, (1 - field.ring / 120) * force);
-      ctx.strokeStyle = 'rgba(34,211,238,' + (0.28 * opacity).toFixed(3) + ')';
-      ctx.lineWidth = 1 + force * 1.8;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(255,255,255,' + (0.08 * force).toFixed(3) + ')';
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      ctx.arc(x, y, 38 + force * 24, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
-    function drawSignals(x, y, force){
-      ctx.font = '600 9px JetBrains Mono, ui-monospace, monospace';
-      ctx.textBaseline = 'middle';
+      ctx.save();
+      ctx.font = '600 13px JetBrains Mono, ui-monospace, monospace';
+      ctx.textBaseline = 'top';
       ctx.lineCap = 'round';
-      for (var i = 0; i < nodes.length; i++){
-        var n = nodes[i];
-        n.drift += 0.012 + force * 0.018;
-        n.life += (force - n.life) * 0.04;
-        var wobble = Math.sin(n.drift) * 7;
-        var nx = x + Math.cos(n.angle) * (n.radius + wobble);
-        var ny = y + Math.sin(n.angle) * (n.radius + wobble);
-        var alpha = Math.max(0, Math.min(1, n.life * force));
 
-        ctx.strokeStyle = 'rgba(34,211,238,' + (0.16 * alpha).toFixed(3) + ')';
-        ctx.lineWidth = 0.7;
+      for (var ci = -2; ci <= 2; ci++){
+        var cx = baseCol + ci * colWidth;
+        var dist = Math.abs(cx - x);
+        var amount = force * Math.max(0, 1 - dist / 170);
+        if (amount <= 0.01) continue;
+
+        var columnGlow = ctx.createLinearGradient(cx, y - 120, cx, y + 120);
+        columnGlow.addColorStop(0, 'rgba(34,211,238,0)');
+        columnGlow.addColorStop(0.48, 'rgba(34,211,238,' + (0.075 * amount).toFixed(3) + ')');
+        columnGlow.addColorStop(1, 'rgba(34,211,238,0)');
+        ctx.strokeStyle = columnGlow;
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(x + Math.cos(n.angle) * 34, y + Math.sin(n.angle) * 34);
-        ctx.lineTo(nx, ny);
+        ctx.moveTo(cx, y - 120);
+        ctx.lineTo(cx, y + 120);
         ctx.stroke();
 
-        ctx.fillStyle = 'rgba(34,211,238,' + (0.55 * alpha).toFixed(3) + ')';
-        ctx.beginPath();
-        ctx.arc(nx, ny, n.size + force * 0.9, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(225,250,252,' + (0.26 * alpha).toFixed(3) + ')';
-        ctx.fillText(n.label, nx + 7, ny);
+        for (var r = -4; r <= 4; r++){
+          var local = 1 - Math.min(1, Math.abs(r) / 4.5);
+          var alpha = amount * local * 0.24;
+          if (alpha <= 0.01) continue;
+          var shift = (x - cx) * 0.025 * amount + Math.sin(tick * 0.045 + ci * 1.7 + r) * 1.8 * amount;
+          var yy = y + r * rowH + Math.sin(tick * 0.035 + r) * 1.4 * amount;
+          var gi = Math.abs((ci * 7 + r * 3 + nowStep) % glyphs.length);
+          ctx.fillStyle = 'rgba(220,255,255,' + alpha.toFixed(3) + ')';
+          ctx.fillText(glyphs[gi], cx + shift, yy);
+        }
       }
+
+      if (press > 0.02){
+        var p = Math.min(1, press * force);
+        var horizontal = ctx.createLinearGradient(x - 76, y, x + 76, y);
+        horizontal.addColorStop(0, 'rgba(34,211,238,0)');
+        horizontal.addColorStop(0.5, 'rgba(34,211,238,' + (0.10 * p).toFixed(3) + ')');
+        horizontal.addColorStop(1, 'rgba(34,211,238,0)');
+        ctx.fillStyle = horizontal;
+        ctx.fillRect(x - 76, y - 1, 152, 2);
+
+        var vertical = ctx.createLinearGradient(x, y - 54, x, y + 54);
+        vertical.addColorStop(0, 'rgba(7,8,10,0)');
+        vertical.addColorStop(0.5, 'rgba(7,8,10,' + (0.12 * p).toFixed(3) + ')');
+        vertical.addColorStop(1, 'rgba(7,8,10,0)');
+        ctx.fillStyle = vertical;
+        ctx.fillRect(x - 2, y - 54, 4, 108);
+      }
+
+      ctx.restore();
     }
 
     function frame(now){
+      tick++;
       ctx.clearRect(0, 0, W, H);
-      if (now - lastInput > 700) target.force *= 0.94;
-      field.x += (target.x - field.x) * 0.18;
-      field.y += (target.y - field.y) * 0.18;
-      field.force += (target.force - field.force) * 0.12;
-      field.pulse += 0.02;
+
+      if (now - lastInput > 320){
+        target.force *= 0.88;
+        target.press *= 0.82;
+      }
+
+      field.x += (target.x - field.x) * 0.22;
+      field.y += (target.y - field.y) * 0.22;
+      field.force += (target.force - field.force) * 0.16;
+      field.press += (target.press - field.press) * 0.18;
 
       var force = Math.max(0, Math.min(1, field.force));
-      if (force > 0.015){
-        var breathing = 1 + Math.sin(field.pulse) * 0.025;
-        drawDepression(field.x, field.y, force * breathing);
-        drawWave(field.x, field.y, force);
-        drawSignals(field.x, field.y, force);
-      }
-      raf = window.requestAnimationFrame(frame);
+      var press = Math.max(0, Math.min(1, field.press));
+      if (force > 0.012) drawDataWake(field.x, field.y, force, press);
+
+      window.requestAnimationFrame(frame);
     }
 
     window.addEventListener('resize', resize, { passive:true });
-    window.addEventListener('pointermove', function(e){ press(e.clientX, e.clientY, e.pressure && e.pressure > 0 ? true : false); }, { passive:true });
-    window.addEventListener('pointerdown', function(e){ press(e.clientX, e.clientY, true); }, { passive:true });
+    window.addEventListener('pointermove', function(e){ setInput(e.clientX, e.clientY, false); }, { passive:true });
+    window.addEventListener('pointerdown', function(e){ setInput(e.clientX, e.clientY, true); }, { passive:true });
     window.addEventListener('pointerup', release, { passive:true });
     window.addEventListener('pointercancel', release, { passive:true });
     window.addEventListener('mouseleave', release, { passive:true });
     window.addEventListener('blur', release, { passive:true });
-    window.addEventListener('touchmove', function(e){ var p = touchPoint(e); press(p.clientX, p.clientY, true); }, { passive:true });
+    window.addEventListener('touchmove', function(e){ var p = point(e); setInput(p.clientX, p.clientY, false); }, { passive:true });
+    window.addEventListener('touchstart', function(e){ var p = point(e); setInput(p.clientX, p.clientY, true); }, { passive:true });
     window.addEventListener('touchend', release, { passive:true });
 
     resize();
-    raf = window.requestAnimationFrame(frame);
+    window.requestAnimationFrame(frame);
   })();
   </script>
 </body>
