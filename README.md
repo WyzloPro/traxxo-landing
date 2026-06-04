@@ -61,6 +61,45 @@ Reglas de protección del cambio:
 
 Nota de testing: en el entorno donde se preparó el cambio no se pudo capturar screenshot automático porque Playwright/Chromium no pudo instalarse; el registry devolvió `403 Forbidden`. La validación visual debe hacerse en preview/producción desde navegador.
 
+## Contrato UI del home público
+
+El home público de Traxxo debe mantenerse como una landing minimal, centrada y waitlist-only.
+
+Reglas de protección:
+
+- Mantener el wordmark `traxxo` como foco visual principal.
+- Mantener el formulario de email + privacidad como única conversión pública.
+- Mantener `login →` como acceso externo a `app.traxxo.ai`.
+- Mantener footer simple con contacto, términos y privacidad.
+- No añadir secciones comerciales largas al home actual.
+- No añadir lógica de onboarding en esta landing.
+- No añadir dashboard, demo, pricing ni explicación completa del producto todavía.
+- No tocar Supabase salvo cambio explícito de captación de leads.
+- No convertir la landing en app.
+- Cualquier efecto visual nuevo debe ser decorativo, reversible y no bloquear interacción.
+
+Capas visuales actuales:
+
+- `#fx`: canvas Matrix de fondo.
+- `.stage`: contenido principal centrado.
+- `.top`: barra superior con marca y login.
+- `.foot`: footer legal/contacto.
+- `#traxxo-touch-field`: overlay táctil visual, sin interacción propia.
+
+Criterio de aceptación:
+
+El usuario debe poder entrar, entender que es acceso anticipado, dejar email, aceptar privacidad y usar login sin interferencias visuales ni técnicas.
+
+## Reversión rápida del Touch Field
+
+Para retirar el Touch Field:
+
+1. Eliminar el bloque HTML `#traxxo-touch-field`.
+2. Eliminar el CSS asociado.
+3. Eliminar el script independiente del Touch Field.
+
+No tocar `#fx`, formulario, Supabase ni estructura del home.
+
 ## Deploy
 
 Push a `main` → Vercel auto-deploya en `www.traxxo.ai`.
