@@ -47,9 +47,9 @@ Implementación en canvas 2D, vanilla JS. Honra `prefers-reduced-motion`.
 
 El home público incluye un selector visual de apariencia en la barra superior:
 
-- `auto`: usa la preferencia del sistema operativo (`prefers-color-scheme`).
+- `oscuro`: modo por defecto para usuarios nuevos o sin preferencia guardada.
 - `claro`: fuerza la versión clara.
-- `oscuro`: fuerza la versión oscura.
+- `auto`: usa la preferencia del sistema operativo (`prefers-color-scheme`) solo si el usuario lo selecciona.
 
 La selección se guarda en `localStorage` con la clave `traxxo-theme`.
 
@@ -93,6 +93,7 @@ Reglas de protección:
 - Mantener `login →` como acceso externo a `app.traxxo.ai`.
 - Mantener footer simple con contacto, términos y privacidad.
 - Mantener selector de apariencia como control secundario, no protagonista.
+- Mantener modo oscuro como apariencia por defecto.
 - No añadir secciones comerciales largas al home actual.
 - No añadir lógica de onboarding en esta landing.
 - No añadir dashboard, demo, pricing ni explicación completa del producto todavía.
@@ -105,7 +106,7 @@ Capas visuales actuales:
 - `#fx`: canvas Matrix de fondo.
 - `.stage`: contenido principal centrado.
 - `.top`: barra superior con marca, selector de apariencia y login.
-- `.theme-switch`: selector `auto / claro / oscuro`.
+- `.theme-switch`: selector `auto / claro / oscuro`, con `oscuro` como valor inicial.
 - `.foot`: footer legal/contacto.
 
 Criterio de aceptación:
