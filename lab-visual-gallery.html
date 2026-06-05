@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Traxxo · galería visual</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#09090b;
+      --fg:#fafafa;
+      --muted:#71717a;
+      --dim:#a1a1aa;
+      --accent:#22d3ee;
+      --accent-soft:rgba(34,211,238,.08);
+      --accent-line:rgba(34,211,238,.24);
+      --border:#1f1f23;
+      --panel:#0d0d10;
+      --font:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+      --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 0%,rgba(34,211,238,.06),transparent 34%),var(--bg);color:var(--fg);font-family:var(--font);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:46px 0 60px}
+    header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:42px}
+    .brand{font-weight:800;font-size:32px;letter-spacing:-.06em;line-height:.9}
+    .brand span{color:var(--accent);text-shadow:0 0 24px rgba(34,211,238,.22)}
+    .kicker{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;margin-top:10px}
+    .copy{max-width:610px;color:var(--dim);font-size:14px;line-height:1.65;margin:22px 0 0}
+    .home-link{font-family:var(--mono);font-size:12px;color:var(--dim);border:1px solid var(--border);border-radius:999px;padding:9px 13px;white-space:nowrap;transition:color .2s,border-color .2s,background .2s}
+    .home-link:hover{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .card{border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));border-radius:20px;overflow:hidden;min-height:260px;position:relative;transition:transform .2s,border-color .2s,background .2s}
+    .card:hover{transform:translateY(-2px);border-color:var(--accent-line);background:linear-gradient(180deg,rgba(34,211,238,.06),rgba(255,255,255,.012))}
+    .preview{height:170px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;background:#07080a}
+    .matrix-preview{background:linear-gradient(180deg,#07080a,#09090b)}
+    .matrix-preview::before{content:'SEO  CTR  H1  META  GA4  GSC  LCP  LLM  RAG  CRAWL  200  301  404';position:absolute;inset:-30px 0 0 -20px;font-family:var(--mono);font-size:13px;line-height:24px;color:rgba(34,211,238,.35);white-space:pre-wrap;word-spacing:20px;transform:skewY(-7deg);opacity:.8;text-shadow:0 0 12px rgba(34,211,238,.18)}
+    .matrix-preview::after{content:'traxxo';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:56px;font-weight:800;letter-spacing:-.06em;color:rgba(250,250,250,.92)}
+    .grid-preview{background:radial-gradient(circle at 58% 45%,rgba(34,211,238,.22),transparent 26%),#07080a}
+    .grid-preview::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(34,211,238,.42) 1px,transparent 1.8px);background-size:28px 28px;background-position:8px 8px;opacity:.62}
+    .grid-preview::after{content:'SEO   AI   CTR\A SERP  KW   RAG';white-space:pre;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:13px;line-height:24px;color:rgba(220,255,255,.65);text-align:center}
+    .body{padding:18px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    h2{font-size:17px;margin:0;letter-spacing:-.02em}
+    .status{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:5px 8px;white-space:nowrap}
+    .status.active{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
+    p{margin:0;color:var(--dim);font-size:13px;line-height:1.55}
+    .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .btn{font-family:var(--mono);font-size:11px;border:1px solid var(--border);border-radius:999px;padding:8px 11px;color:var(--dim);transition:color .2s,border-color .2s,background .2s}
+    .btn:hover{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
+    .rules{margin-top:28px;border:1px solid var(--border);border-radius:18px;padding:18px;background:rgba(255,255,255,.018)}
+    .rules h3{font-size:14px;margin:0 0 10px;font-family:var(--mono);color:var(--dim);font-weight:600}
+    .rules ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.7}
+    @media(max-width:760px){.wrap{width:min(100% - 28px,1120px);padding-top:26px}.grid{grid-template-columns:1fr}header{flex-direction:column}.home-link{align-self:flex-start}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="brand">tra<span>x</span>xo</div>
+        <div class="kicker">galería visual · laboratorio</div>
+        <p class="copy">Espacio para guardar y comparar efectos visuales antes de tocar el home público. El Matrix actual queda como referencia. Nuevos efectos se prueban aquí primero.</p>
+      </div>
+      <a class="home-link" href="/">volver al home</a>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <div class="preview matrix-preview"></div>
+        <div class="body">
+          <div class="row">
+            <h2>Matrix Traxxo</h2>
+            <span class="status active">referencia actual</span>
+          </div>
+          <p>Lenguaje visual actual del home: lluvia de tokens SEO/IA sobre fondo oscuro. Queda guardado como referencia base.</p>
+          <div class="actions">
+            <a class="btn" href="/">ver home actual</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="preview grid-preview"></div>
+        <div class="body">
+          <div class="row">
+            <h2>Grid Mouse Effect</h2>
+            <span class="status">experimento</span>
+          </div>
+          <p>Prueba aislada inspirada en el CodePen compartido: grilla reactiva al cursor con tokens Traxxo/SEO/IA.</p>
+          <div class="actions">
+            <a class="btn" href="/lab-grid-mouse-effect.html">abrir prueba</a>
+            <a class="btn" href="https://codepen.io/creativeocean/pen/emBOove" rel="noreferrer">ver referencia</a>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="rules">
+      <h3>Reglas de uso</h3>
+      <ul>
+        <li>No tocar producción por un efecto visual hasta aprobarlo en laboratorio.</li>
+        <li>No mezclar efectos encima del Matrix actual sin decisión explícita.</li>
+        <li>Guardar aquí cada opción interesante antes de decidir.</li>
+      </ul>
+    </section>
+  </div>
+</body>
+</html>
