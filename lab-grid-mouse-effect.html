@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Traxxo · lab grid mouse effect</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#09090b;
+      --fg:#fafafa;
+      --muted:#71717a;
+      --dim:#a1a1aa;
+      --accent:#22d3ee;
+      --accent-soft:rgba(34,211,238,.08);
+      --accent-line:rgba(34,211,238,.22);
+      --border:#1f1f23;
+      --font:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+      --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--font)}
+    canvas{position:fixed;inset:0;width:100%;height:100%;display:block;background:#07080a}
+    .hud{
+      position:fixed;left:24px;right:24px;top:20px;z-index:2;
+      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      pointer-events:none;
+    }
+    .brand{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--dim)}
+    .brand strong{font-family:var(--font);font-size:18px;letter-spacing:-.04em;color:var(--fg)}
+    .brand strong span{color:var(--accent)}
+    .badge{
+      font-family:var(--mono);font-size:11px;color:var(--muted);
+      border:1px solid var(--border);border-radius:999px;padding:8px 12px;
+      background:rgba(9,9,11,.58);backdrop-filter:blur(12px)
+    }
+    .center{
+      position:fixed;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;pointer-events:none;
+      mix-blend-mode:screen;
+    }
+    .wordmark{
+      font-weight:800;font-size:clamp(70px,16vw,210px);line-height:.9;letter-spacing:-.06em;
+      color:rgba(250,250,250,.92);text-shadow:0 0 42px rgba(34,211,238,.08);
+    }
+    .wordmark span{color:var(--accent);text-shadow:0 0 28px rgba(34,211,238,.30),0 0 64px rgba(34,211,238,.14)}
+    .note{
+      position:fixed;left:24px;right:24px;bottom:20px;z-index:2;
+      display:flex;justify-content:space-between;gap:18px;align-items:center;
+      font-family:var(--mono);font-size:11px;color:var(--muted);pointer-events:none;
+    }
+    .note code{color:var(--dim);font-family:var(--mono)}
+    @media (max-width:640px){
+      .hud{left:16px;right:16px;top:14px;align-items:flex-start}
+      .badge{font-size:10px;padding:7px 10px;text-align:right}
+      .note{left:16px;right:16px;bottom:14px;flex-direction:column;align-items:flex-start;font-size:10px}
+    }
+    @media (prefers-reduced-motion:reduce){
+      canvas{display:none}
+      body{background:#09090b}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="grid"></canvas>
+
+  <div class="hud">
+    <div class="brand"><strong>tra<span>x</span>xo</strong><br/>lab visual</div>
+    <div class="badge">experimento aislado · no home</div>
+  </div>
+
+  <div class="center" aria-hidden="true">
+    <div class="wordmark">tra<span>x</span>xo</div>
+  </div>
+
+  <div class="note">
+    <span>mueve el cursor/toca la pantalla</span>
+    <span><code>grid reveal</code> inspirado en canvas, adaptado sin librerías externas</span>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var canvas = document.getElementById('grid');
+    var ctx = canvas.getContext('2d', { alpha:false });
+    var W = 0, H = 0, DPR = 1;
+    var cell = 54;
+    var points = [];
+    var pointer = { x: 0, y: 0, tx: 0, ty: 0, active:false, force:0 };
+    var tick = 0;
+    var tokens = ['SEO','AI','CTR','SERP','KW','URL','RAG','BOT','200','301','404','GSC','GA4','LCP','H1','META'];
+
+    function resize(){
+      W = window.innerWidth;
+      H = window.innerHeight;
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      cell = W < 640 ? 42 : 54;
+      buildGrid();
+    }
+
+    function buildGrid(){
+      points = [];
+      var pad = cell * 2;
+      for (var y = -pad; y <= H + pad; y += cell){
+        for (var x = -pad; x <= W + pad; x += cell){
+          points.push({
+            x:x,
+            y:y,
+            seed:Math.random()*1000,
+            token:tokens[(Math.random()*tokens.length)|0]
+          });
+        }
+      }
+    }
+
+    function setPointer(x,y,strong){
+      pointer.tx = x;
+      pointer.ty = y;
+      pointer.active = true;
+      pointer.force = strong ? 1 : 0.72;
+    }
+
+    window.addEventListener('pointermove', function(e){ setPointer(e.clientX, e.clientY, false); }, { passive:true });
+    window.addEventListener('pointerdown', function(e){ setPointer(e.clientX, e.clientY, true); }, { passive:true });
+    window.addEventListener('pointerup', function(){ pointer.force = 0.42; }, { passive:true });
+    window.addEventListener('pointercancel', function(){ pointer.active=false; }, { passive:true });
+    window.addEventListener('mouseleave', function(){ pointer.active=false; pointer.force=0; }, { passive:true });
+    window.addEventListener('resize', resize, { passive:true });
+
+    function drawBackground(){
+      var g = ctx.createRadialGradient(W*0.5, H*0.5, 0, W*0.5, H*0.5, Math.max(W,H)*0.72);
+      g.addColorStop(0, '#0b1015');
+      g.addColorStop(0.55, '#08090c');
+      g.addColorStop(1, '#050608');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,W,H);
+    }
+
+    function draw(){
+      tick++;
+      drawBackground();
+
+      pointer.x += (pointer.tx - pointer.x) * 0.12;
+      pointer.y += (pointer.ty - pointer.y) * 0.12;
+      if (!pointer.active) pointer.force *= 0.94;
+
+      var radius = Math.min(360, Math.max(190, W * 0.20));
+      var inner = radius * 0.36;
+
+      ctx.save();
+      ctx.font = '600 12px JetBrains Mono, ui-monospace, monospace';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+
+      for (var i=0;i<points.length;i++){
+        var p = points[i];
+        var dx = p.x - pointer.x;
+        var dy = p.y - pointer.y;
+        var d = Math.hypot(dx, dy);
+        var wave = Math.sin((tick * 0.018) + p.seed) * 0.5 + 0.5;
+        var base = 0.055 + wave * 0.035;
+        var near = pointer.active || pointer.force > 0.02 ? Math.max(0, 1 - d / radius) : 0;
+        var core = Math.max(0, 1 - d / inner);
+        var a = Math.min(1, base + near * near * 0.42 + core * 0.22 * pointer.force);
+        var size = 1.2 + near * 6.8 + core * 5.5 * pointer.force;
+
+        if (near > 0.02){
+          var push = near * near * 14 * pointer.force;
+          var angle = Math.atan2(dy, dx);
+          var px = p.x + Math.cos(angle) * push;
+          var py = p.y + Math.sin(angle) * push;
+
+          ctx.fillStyle = 'rgba(34,211,238,' + (a * 0.65).toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.arc(px, py, size * 0.34, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (near > 0.28){
+            ctx.fillStyle = 'rgba(220,255,255,' + (near * 0.42).toFixed(3) + ')';
+            ctx.fillText(p.token, px, py - cell * 0.34);
+          }
+        } else {
+          ctx.fillStyle = 'rgba(34,211,238,' + a.toFixed(3) + ')';
+          ctx.fillRect(p.x - 0.8, p.y - 0.8, 1.6, 1.6);
+        }
+      }
+
+      if (pointer.active || pointer.force > 0.02){
+        var ring = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, radius);
+        ring.addColorStop(0, 'rgba(34,211,238,0.10)');
+        ring.addColorStop(0.34, 'rgba(34,211,238,0.05)');
+        ring.addColorStop(1, 'rgba(34,211,238,0)');
+        ctx.fillStyle = ring;
+        ctx.fillRect(pointer.x - radius, pointer.y - radius, radius*2, radius*2);
+      }
+
+      ctx.restore();
+      requestAnimationFrame(draw);
+    }
+
+    pointer.x = pointer.tx = window.innerWidth * 0.5;
+    pointer.y = pointer.ty = window.innerHeight * 0.5;
+    resize();
+    draw();
+  })();
+  </script>
+</body>
+</html>
