@@ -101,6 +101,7 @@
     .hero-point, .stage-card, .who-card, .fit-card {
       border-radius: 18px; padding: 20px;
       background: #0d0d10; border: 1px solid rgba(255,255,255,.05);
+      min-width: 0; overflow-wrap: anywhere;
     }
     .hero-point strong { display: block; font-size: 14px; margin-bottom: 4px; }
     .hero-point span, .stage-card p, .who-card p, .fit-card p { display: block; color: var(--muted); font-size: 14px; }
@@ -185,6 +186,7 @@
     .section-sub { color: var(--muted); font-size: 16px; max-width: 720px; margin-bottom: 24px; }
     .stage-grid, .who-grid, .fit-grid {
       display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+      align-items: stretch;
     }
     .badge {
       display: inline-flex; padding: 5px 10px; border-radius: 999px;
